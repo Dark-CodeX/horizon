@@ -17,7 +17,7 @@
 #include "../defines/keywords_primary_data_types.h"
 #include "../token/token.hh"
 #include "../token_type/token_type.hh"
-#include "./lexer_errors/lexer_errors.hh"
+#include "../errors/errors.hh"
 #include "../colorize/colorize.h"
 
 namespace horizon
@@ -74,9 +74,9 @@ namespace horizon
 
             bool handle_integer_decimal();
             void handle_identifier();
-            [[nodiscard]] lexer_errors_code handle_comments();
-            [[nodiscard]] lexer_errors_code handle_char();
-            [[nodiscard]] lexer_errors_code handle_string();
+            [[nodiscard]] error_code handle_comments();
+            [[nodiscard]] error_code handle_char();
+            [[nodiscard]] error_code handle_string();
 
             [[nodiscard]] std::size_t check_brackets() const;
 
