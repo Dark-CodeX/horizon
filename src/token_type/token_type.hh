@@ -1,0 +1,85 @@
+/**
+ * @file token_type.hh
+ * @license This file is licensed under the GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007. You may obtain a copy of this license at https://www.gnu.org/licenses/gpl-3.0.en.html.
+ * @author Tushar Chaurasia (Dark-CodeX)
+ */
+
+#ifndef HORIZON_TOKEN_TYPE_HH
+#define HORIZON_TOKEN_TYPE_HH
+
+namespace horizon
+{
+    enum class token_type : unsigned char // max 256 tokens
+    {
+        TOKEN_IDENTIFIER,
+
+        TOKEN_CHAR_LITERAL,
+        TOKEN_STRING_LITERAL,
+
+        TOKEN_INTEGER_LITERAL,
+        TOKEN_DECIMAL_LITERAL,
+
+        TOKEN_ARITHMETIC_ADD,
+        TOKEN_ARITHMETIC_SUBSTRACT,
+        TOKEN_ARITHMETIC_MULTIPLY,
+        TOKEN_ARITHMETIC_POWER,
+        TOKEN_ARITHMETIC_DIVIDE,
+        TOKEN_ARITHMETIC_MODULUS,
+
+        TOKEN_RELATIONAL_EQUAL_TO,
+        TOKEN_RELATIONAL_NOT_EQUAL_TO,
+        TOKEN_RELATIONAL_GREATER_THAN,
+        TOKEN_RELATIONAL_LESS_THAN,
+        TOKEN_RELATIONAL_GREATER_THAN_OR_EQUAL_TO,
+        TOKEN_RELATIONAL_LESS_THAN_OR_EQUAL_TO,
+
+        TOKEN_LOGICAL_NOT,
+        TOKEN_LOGICAL_AND,
+        TOKEN_LOGICAL_OR,
+
+        TOKEN_BITWISE_NOT,
+        TOKEN_BITWISE_AND,
+        TOKEN_BITWISE_OR,
+        TOKEN_BITWISE_XOR,
+        TOKEN_BITWISE_LEFT_SHIFT,
+        TOKEN_BITWISE_RIGHT_SHIFT,
+
+        TOKEN_ASSIGN,
+        TOKEN_ASSIGN_ADD,
+        TOKEN_ASSIGN_SUBSTRACT,
+        TOKEN_ASSIGN_MULTIPLY,
+        TOKEN_ASSIGN_DIVIDE,
+        TOKEN_ASSIGN_MODULUS,
+        TOKEN_ASSIGN_BITWISE_AND,
+        TOKEN_ASSIGN_BITWISE_OR,
+        TOKEN_ASSIGN_BITWISE_XOR,
+        TOKEN_ASSIGN_LEFT_SHIFT,
+        TOKEN_ASSIGN_RIGHT_SHIFT,
+
+        TOKEN_INCREMENT,
+        TOKEN_DECREMENT,
+
+        TOKEN_QUESTION,
+
+        TOKEN_SEMICOLON,
+        TOKEN_COLON,
+        TOKEN_COMMA,
+        TOKEN_DOT,
+
+        TOKEN_RIGHT_PAREN,
+        TOKEN_LEFT_PAREN,
+
+        TOKEN_RIGHT_BRACE,
+        TOKEN_LEFT_BRACE,
+
+        TOKEN_RIGHT_BRACKET,
+        TOKEN_LEFT_BRACKET,
+
+        TOKEN_KEYWORD,
+        TOKEN_PRIMARY_TYPE,
+
+        TOKEN_END_OF_FILE
+    };
+}
+
+#endif
