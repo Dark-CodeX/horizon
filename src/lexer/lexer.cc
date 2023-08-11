@@ -702,33 +702,33 @@ namespace horizon
 
         std::size_t lexer::check_brackets() const
         {
-            long counter = 0;
+            std::stack<std::pair<std::size_t, token_type>> s;
+
             for (std::size_t i = 0; i < this->M_tokens.length(); ++i)
             {
                 const token_type &type = this->M_tokens[i].M_type;
                 if (type == token_type::TOKEN_LEFT_PAREN || type == token_type::TOKEN_LEFT_BRACKET || type == token_type::TOKEN_LEFT_BRACE)
                 {
-                    counter++;
+                    s.push({i, type});
                 }
                 else if (type == token_type::TOKEN_RIGHT_PAREN || type == token_type::TOKEN_RIGHT_BRACKET || type == token_type::TOKEN_RIGHT_BRACE)
                 {
-                    counter--;
-                    if (counter < 0)
+                    if (s.empty())
                         return i;
+
+                    std::pair<std::size_t, token_type> top = s.top(); // copy is created
+                    s.pop();
+
+                    if ((type == token_type::TOKEN_RIGHT_PAREN && top.second != token_type::TOKEN_LEFT_PAREN) ||
+                        (type == token_type::TOKEN_RIGHT_BRACKET && top.second != token_type::TOKEN_LEFT_BRACKET) ||
+                        (type == token_type::TOKEN_RIGHT_BRACE && top.second != token_type::TOKEN_LEFT_BRACE))
+                    {
+                        return i;
+                    }
                 }
             }
 
-            if (counter > 0)
-            {
-                for (int i = this->M_tokens.length() - 1; i >= 0; --i)
-                {
-                    const token_type &type = this->M_tokens[i].M_type;
-                    if (type == token_type::TOKEN_LEFT_PAREN || type == token_type::TOKEN_LEFT_BRACKET || type == token_type::TOKEN_LEFT_BRACE)
-                        return i;
-                }
-            }
-
-            return static_cast<std::size_t>(-1);
+            return (s.empty()) ? static_cast<std::size_t>(-1) : s.top().first;
         }
 
         lexer::lexer(const horizon_deps::string &location)
@@ -747,6 +747,14 @@ namespace horizon
             if (!this->scan_tokens())
                 return false;
             this->M_tokens.add(token{token_type::TOKEN_END_OF_FILE, nullptr, static_cast<std::size_t>(-1), static_cast<std::size_t>(-1)});
+            std::size_t invalid_bracket_pos = this->check_brackets();
+            if (invalid_bracket_pos != static_cast<std::size_t>(-1))
+            {
+                lexer_errors::draw_error(lexer_errors_code::HORIZON_INVALID_BRACKET, this->M_file_location, lexer_errors::getline_no(this->M_file, this->M_tokens[invalid_bracket_pos].M_start),
+                                         this->M_tokens[invalid_bracket_pos].M_start,
+                                         this->M_tokens[invalid_bracket_pos].M_end, {"invalid or unexpected bracket", this->M_tokens[invalid_bracket_pos].M_lexeme}, this->M_file);
+                return false;
+            }
             this->clear_memory();
             return true;
         }

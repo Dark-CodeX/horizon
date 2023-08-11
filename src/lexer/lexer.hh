@@ -9,6 +9,7 @@
 
 #include <cerrno>
 #include <cctype>
+#include <stack>
 
 #include "../../deps/string/string.hh"
 #include "../../deps/vector/vector.hh"
