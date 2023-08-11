@@ -39,3 +39,4 @@ build
 .vs
 bin
 *.bin
+.history
