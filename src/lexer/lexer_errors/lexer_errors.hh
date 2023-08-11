@@ -25,6 +25,7 @@ namespace horizon
             HORIZON_MISSING_TERMINATING_CHAR,
             HORIZON_LESS_BYTES,
             HORIZON_MORE_BYTES,
+            HORIZON_INVALID_BRACKET,
             HORIZON_NO_ERROR
         };
 
@@ -32,6 +33,8 @@ namespace horizon
         {
         public:
             [[nodiscard]] static std::pair<horizon_deps::string, std::size_t> getline(const horizon_deps::string &str, const std::size_t &start, const std::size_t &end__, const horizon_deps::string &color);
+
+            [[nodiscard]] static std::size_t getline_no(const horizon_deps::string &str, const std::size_t &start);
 
             static void draw_error(const lexer_errors_code &code, const horizon_deps::string &file_loc, const std::size_t &line_no, const std::size_t &start, const std::size_t &end, const horizon_deps::vector<horizon_deps::string> &err_msg, const horizon_deps::string &file);
         };

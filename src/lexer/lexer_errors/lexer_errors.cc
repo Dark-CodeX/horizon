@@ -35,6 +35,17 @@ namespace horizon
             return {line_start + line_middle + line_end, start - line_start_pos};
         }
 
+        std::size_t lexer_errors::getline_no(const horizon_deps::string &str, const std::size_t &start)
+        {
+            std::size_t cline = 1;
+            for (std::size_t i = 0; i < start; i++)
+            {
+                if (str[i] == '\n')
+                    cline++;
+            }
+            return cline;
+        }
+
         void lexer_errors::draw_error(const lexer_errors_code &code, const horizon_deps::string &file_loc, const std::size_t &line_no, const std::size_t &start, const std::size_t &end, const horizon_deps::vector<horizon_deps::string> &err_msg, const horizon_deps::string &file)
         {
             std::pair<horizon_deps::string, std::size_t> data = lexer_errors::getline(file, start, end, RED_FG);
