@@ -4,8 +4,8 @@
  * @author Tushar Chaurasia (Dark-CodeX)
  */
 
-#ifndef HORIZON_TOKEN_TYPE_HH
-#define HORIZON_TOKEN_TYPE_HH
+#ifndef HORIZON_TOKEN_TYPE_TOKEN_TYPE_HH
+#define HORIZON_TOKEN_TYPE_TOKEN_TYPE_HH
 
 namespace horizon
 {

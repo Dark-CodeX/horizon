@@ -4,8 +4,8 @@
  * @author Tushar Chaurasia (Dark-CodeX)
  */
 
-#ifndef HORIZON_DEPS_VECTOR_HH
-#define HORIZON_DEPS_VECTOR_HH
+#ifndef HORIZON_DEPS_VECTOR_VECTOR_HH
+#define HORIZON_DEPS_VECTOR_VECTOR_HH
 
 #include <initializer_list>
 #include <utility>

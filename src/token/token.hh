@@ -4,8 +4,8 @@
  * @author Tushar Chaurasia (Dark-CodeX)
  */
 
-#ifndef HORIZON_TOKEN_HH
-#define HORIZON_TOKEN_HH
+#ifndef HORIZON_TOKEN_TOKEN_HH
+#define HORIZON_TOKEN_TOKEN_HH
 
 #include "../../deps/string/string.hh"
 #include "../token_type/token_type.hh"

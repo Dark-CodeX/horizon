@@ -4,8 +4,8 @@
  * @author Tushar Chaurasia (Dark-CodeX)
  */
 
-#ifndef HORIZON_DEPS_STRING_HH
-#define HORIZON_DEPS_STRING_HH
+#ifndef HORIZON_DEPS_STRING_STRING_HH
+#define HORIZON_DEPS_STRING_STRING_HH
 
 #include <cstdlib>
 #include <cstring>
