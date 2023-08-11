@@ -43,7 +43,7 @@ namespace horizon
         return cline;
     }
 
-    void errors::draw_error(const error_code &code, const horizon_deps::string &file_loc, const std::size_t &line_no, const std::size_t &start, const std::size_t &end, const horizon_deps::vector<horizon_deps::string> &err_msg, const horizon_deps::string &file)
+    void errors::lexer_draw_error(const error_code &code, const horizon_deps::string &file_loc, const std::size_t &line_no, const std::size_t &start, const std::size_t &end, const horizon_deps::vector<horizon_deps::string> &err_msg, const horizon_deps::string &file)
     {
         std::pair<horizon_deps::string, std::size_t> data = errors::getline(file, start, end, RED_FG);
         if (COLOR_ERR)

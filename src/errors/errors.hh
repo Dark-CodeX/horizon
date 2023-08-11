@@ -35,7 +35,7 @@ namespace horizon
 
         [[nodiscard]] static std::size_t getline_no(const horizon_deps::string &str, const std::size_t &start);
 
-        static void draw_error(const error_code &code, const horizon_deps::string &file_loc, const std::size_t &line_no, const std::size_t &start, const std::size_t &end, const horizon_deps::vector<horizon_deps::string> &err_msg, const horizon_deps::string &file);
+        static void lexer_draw_error(const error_code &code, const horizon_deps::string &file_loc, const std::size_t &line_no, const std::size_t &start, const std::size_t &end, const horizon_deps::vector<horizon_deps::string> &err_msg, const horizon_deps::string &file);
     };
 }
 
