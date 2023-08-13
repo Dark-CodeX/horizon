@@ -1,0 +1,170 @@
+<program>                               ::=     <declaration_list>
+
+<block_declaration>                     ::=     "block" <identifier> "{" <declaration_list> "}"
+
+<scope_declaration>                     ::=     <identifier_list> "{" <declaration_list> "}" 
+
+<declaration_list>                      ::=     <declaration>
+                                                | <declaration_list> <declaration>
+                                                | <struct_declaration>
+                                                | <template_struct_declaration>
+
+<struct_declaration>                    ::=     "struct" <identifier> "{" <declaration_list> "}"
+
+<template_struct_declaration>           ::=     "struct" <identifier> "<" <identifier_list> ">" "{" <declaration_list> "}"
+
+<identifier_list>                       ::=     <identifier> "," <identifier_list>
+
+<declaration>                           ::=     <variable_declaration_list>
+                                                | <function_declaration>
+
+<variable_declaration_list>             ::=     <type_specifier> ":" <variable_declarator_list> ";"
+
+<variable_declarator_list>              ::=     <variable_initialization_list> "," <variable_declarator_list'>
+
+<variable_declarator_list'>             ::=     "," <variable_declarator_list>
+                                                | ε
+
+<variable_initialization_list>          ::=     <identifier> 
+                                                | <identifier> "=" <expression>
+                                                | <identifier> "=" "[" <fixed_array> "]"
+
+<fixed_array>                            ::=    <expression> <fixed_array'>
+                                                | ε
+
+<fixed_array'>                          ::=     "," <fixed_array>
+                                                | ε
+
+<function_declaration>                  ::=     "func" <identifier> "(" <parameter_list> ")" ":" <type_specifier> "{" <statement_list> "}"
+
+<parameter_list>                        ::=     <parameter> "," <parameter_list>
+                                                | <parameter>
+                                                | ε
+
+<parameter>                             ::=     <type_specifier> ":" <identifier>
+
+<type_specifier>                        ::=     "char",
+                                                | "uchar"
+                                                | "u8char"
+                                                | "u16char"
+                                                | "u32char"
+                                                | "str"
+                                                | "ustr"
+                                                | "u8str"
+                                                | "u16str"
+                                                | "u32str"
+                                                | "bool"
+                                                | "int8"
+                                                | "uint8"
+                                                | "int16"
+                                                | "uint16"
+                                                | "int32"
+                                                | "uint32"
+                                                | "int64"
+                                                | "uint64"
+                                                | "dec32"
+                                                | "dec64"
+                                                | "dec128"
+                                                | "void"
+
+<identifier>                            ::=     <id_start> <id_tail>
+
+<id_start>                              ::=     <letter> | "_" | "$"
+
+<id_tail>                               ::=     <letter> <id_tail>
+                                                | <digit> <id_tail>
+                                                | "_" <id_tail>
+                                                | "$" <id_tail>
+                                                | ε
+
+<letter>                                ::=     "a" | "b" | ... | "z" | "A" | "B" | ... | "Z"
+
+<digit>                                 ::=     "0" | "1" | ... | "9"
+
+<statement_list>                        ::=     <statement> <statement_list>
+                                                | ε
+
+<statement>                             ::=     <expression_statement>
+                                                | <compound_statement>
+                                                | <selection_statement>
+                                                | <iteration_statement>
+                                                | <jump_statement>
+
+<expression_statement>                  ::=     ";"
+                                                | <expression> ";"
+
+<compound_statement>                    ::=     "{" <statement_list> "}"
+
+<selection_statement>                   ::=     "if" "(" <expression> ")" <statement>
+                                                | "if" "(" <expression> ")" <statement> "else" <statement>
+                                                | "if" "(" <expression> ")" <statement> <elif_list> "else" <statement>
+                                                | "if" "(" <expression> ")" <statement> <elif_list>
+
+<elif_list>                             ::=     <elif_clause>
+                                                | <elif_clause> <elif_list>
+
+<elif_clause>                           ::=     "elif" "(" <expression> ")" <statement>
+
+<iteration_statement>                   ::=     "while" "(" <expression> ")" <statement>
+                                                | "do" <statement> "while" "(" <expression> ")"
+                                                | "for" "(" <variable_declaration_list> | ε ";" <expression> | ε ";" <expression> | ε ")" <statement>
+
+<jump_statement>                        ::=     "return" ";"
+                                                | "break" ";"
+                                                | "continue" ";"
+                                                | "return" <expression> ";"
+
+<expression>                            ::=     <expression> <operator> <expression>
+                                                | <operator> <expression>
+                                                | <expression> <operator>
+                                                | <literal>
+                                                | <identifier>
+
+<literal>                               ::=     <number_literal>
+                                                | <boolean_literal>
+                                                | <string_literal>
+                                                | <char_literal>
+
+<number_literal>                        ::=     
+
+<boolean_literal>                       ::=     "true"
+                                                | "false"
+
+<string_literal>                        ::=     "\"" <character>+ "\""
+
+<char_literal>                          ::=     "'" <character> "'"
+
+<operator>                              ::=     "+"
+                                                | "-"
+                                                | "*"
+                                                | "**"
+                                                | "/"
+                                                | "%"
+                                                | "=="
+                                                | "!="
+                                                | ">"
+                                                | "<"
+                                                | ">="
+                                                | "<="
+                                                | "!"
+                                                | "&&"
+                                                | "||"
+                                                | "~"
+                                                | "&"
+                                                | "|"
+                                                | "^"
+                                                | "<<"
+                                                | ">>"
+                                                | "="
+                                                | "+="
+                                                | "-="
+                                                | "*="
+                                                | "/="
+                                                | "%="
+                                                | "&="
+                                                | "|="
+                                                | "^="
+                                                | "<<="
+                                                | ">>="
+                                                | "++"
+                                                | "--"
