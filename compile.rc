@@ -1,0 +1,73 @@
+depends('g++')
+depends('rm')
+depends('mkdir')
+depends('./src/defines/defines.h')
+depends('./src/defines/keywords_primary_data_types.h')
+depends('./src/entry/horizon.cc')
+depends('./src/errors/errors.cc')
+depends('./src/errors/errors.hh')
+depends('./src/token/token.hh')
+depends('./src/token_type/token_type.hh')
+depends('./src/lexer/lexer.cc')
+depends('./src/lexer/lexer.hh')
+depends('./src/parser/parser.cc')
+depends('./src/parser/parser.hh')
+depends('./deps/string/string.cc')
+depends('./deps/string/string.hh')
+depends('./deps/vector/vector.hh')
+depends('./src/colorize/colorize.cc')
+depends('./src/colorize/colorize.h')
+
+[compiler]:
+    compiler = 'g++'
+
+[arguments]:
+    if os_arch == '32'
+        release_args = ['-std=c++23', '-m32', '-O3', '-DNDEBUG', '-march=native', '-mtune=native', '-masm=intel']
+        debug_args = ['-std=c++23', '-m32', '-g', '-ggdb3', '-Wall', '-Wextra', '-Wuninitialized', '-Wstrict-aliasing', '-Wshadow', '-pedantic', '-Wmissing-declarations', '-Wmissing-include-dirs', '-Wnoexcept', '-Wunused']
+    else
+        release_args = ['-std=c++23', '-m64', '-O3', '-DNDEBUG', '-march=native', '-mtune=native', '-masm=intel']
+        debug_args = ['-std=c++23', '-m64', '-g', '-ggdb3', '-Wall', '-Wextra', '-Wuninitialized', '-Wstrict-aliasing', '-Wshadow', '-pedantic', '-Wmissing-declarations', '-Wmissing-include-dirs', '-Wnoexcept', '-Wunused']
+    endif
+
+[sources]:
+    1 = './deps/string/string.cc'
+    2 = './src/errors/errors.cc'
+    3 = './src/lexer/lexer.cc'
+    4 = './src/colorize/colorize.cc'
+    5 = './src/parser/parser.cc'
+    6 = './src/entry/horizon.cc'
+
+[output]:
+    release = ['-o', './bin/horizon']
+    debug = ['-o', './bin/horizon_debug']
+
+[clean]:
+    cmd = ['rm', './bin/horizon', './bin/horizon_debug']
+
+[make_dir]:
+    cmd = ['mkdir', '-p', './bin']
+
+[strip]:
+    cmd = ['strip', './bin/horizon']
+
+[release]:
+    compiler()
+    arguments()[0]
+    sources()
+    output()[0]
+
+[debug]:
+    compiler()
+    arguments()[1]
+    sources()
+    output()[1]
+
+[run]:
+    cmd = ['./bin/horizon_debug', './sample/expr.hr']
+
+[all]:
+    make_dir()
+    release()
+    debug()
+    strip()
