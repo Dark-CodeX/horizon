@@ -2,6 +2,7 @@ depends('g++')
 depends('rm')
 depends('mkdir')
 depends('./src/defines/defines.h')
+depends('./src/defines/keywords_primary_data_types.cc')
 depends('./src/defines/keywords_primary_data_types.h')
 depends('./src/entry/horizon.cc')
 depends('./src/errors/errors.cc')
@@ -37,6 +38,7 @@ depends('./src/colorize/colorize.h')
     4 = './src/colorize/colorize.cc'
     5 = './src/parser/parser.cc'
     6 = './src/entry/horizon.cc'
+    7 = './src/defines/keywords_primary_data_types.cc'
 
 [output]:
     release = ['-o', './bin/horizon']
