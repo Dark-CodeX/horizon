@@ -41,10 +41,6 @@ namespace horizon
             char M_invalid_ec; // stores any invalid escape seq.
 
         private:
-            [[nodiscard]] static bool is_keyword(const horizon_deps::string &str);
-            [[nodiscard]] static bool is_primary_data_type(const horizon_deps::string &str);
-
-        private:
             [[nodiscard]] bool load_file();
 
             void clear_memory();

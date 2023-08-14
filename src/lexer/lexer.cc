@@ -10,22 +10,6 @@ namespace horizon
 {
     namespace horizon_lexer
     {
-        bool lexer::is_keyword(const horizon_deps::string &str)
-        {
-            for (std::size_t i = 0; i < (sizeof(horizon_keywords) / sizeof(*horizon_keywords)); i++)
-                if (str == horizon_keywords[i])
-                    return true;
-            return false;
-        }
-
-        bool lexer::is_primary_data_type(const horizon_deps::string &str)
-        {
-            for (std::size_t i = 0; i < (sizeof(horizon_primary_data_types) / sizeof(*horizon_primary_data_types)); i++)
-                if (str == horizon_primary_data_types[i])
-                    return true;
-            return false;
-        }
-
         bool lexer::load_file()
         {
             std::FILE *fptr = std::fopen(this->M_file_location.c_str(), "rb");
@@ -412,9 +396,9 @@ namespace horizon
             horizon_deps::string temp(this->M_file.substr(this->M_start_lexer, this->M_current_lexer - this->M_start_lexer));
             if (type == token_type::TOKEN_IDENTIFIER)
             {
-                if (lexer::is_keyword(temp))
+                if (is_keyword(temp.c_str()))
                     this->M_tokens.add(token{token_type::TOKEN_KEYWORD, std::move(temp), this->M_start_lexer, this->M_current_lexer});
-                else if (lexer::is_primary_data_type(temp))
+                else if (is_primary_data_type(temp.c_str()))
                     this->M_tokens.add(token{token_type::TOKEN_PRIMARY_TYPE, std::move(temp), this->M_start_lexer, this->M_current_lexer});
                 else
                     this->M_tokens.add(token{type, std::move(temp), this->M_start_lexer, this->M_current_lexer});

@@ -7,6 +7,8 @@
 #ifndef HORIZON_DEFINES_KEYWORDS_PRIMARY_DATA_TYPES_H
 #define HORIZON_DEFINES_KEYWORDS_PRIMARY_DATA_TYPES_H
 
+#include <cstring>
+
 static const char *horizon_keywords[] = {
     "let",
     "func",
@@ -70,5 +72,9 @@ static const char *horizon_primary_data_types[] = {
     "dec64",
     "dec128",
     "void"};
+
+int is_keyword(const char *str);
+
+int is_primary_data_type(const char *str);
 
 #endif
