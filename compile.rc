@@ -18,6 +18,9 @@ depends('./deps/string/string.hh')
 depends('./deps/vector/vector.hh')
 depends('./src/colorize/colorize.cc')
 depends('./src/colorize/colorize.h')
+depends('./src/misc/misc.cc')
+depends('./src/misc/misc.hh')
+depends('./src/misc/file/file.hh')
 
 [compiler]:
     compiler = 'g++'
@@ -33,12 +36,13 @@ depends('./src/colorize/colorize.h')
 
 [sources]:
     1 = './deps/string/string.cc'
-    2 = './src/errors/errors.cc'
-    3 = './src/lexer/lexer.cc'
-    4 = './src/colorize/colorize.cc'
-    5 = './src/parser/parser.cc'
-    6 = './src/entry/horizon.cc'
-    7 = './src/defines/keywords_primary_data_types.cc'
+    2 = './src/misc/misc.cc'
+    3 = './src/errors/errors.cc'
+    4 = './src/lexer/lexer.cc'
+    5 = './src/colorize/colorize.cc'
+    6 = './src/parser/parser.cc'
+    7 = './src/entry/horizon.cc'
+    8 = './src/defines/keywords_primary_data_types.cc'
 
 [output]:
     release = ['-o', './bin/horizon']
