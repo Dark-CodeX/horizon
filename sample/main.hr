@@ -1,0 +1,30 @@
+func add(const ref int32: a, const ref int32: b): int32 {
+    return a + b;
+}
+
+func main(): int32 {
+    int32: i = 13, j = 45;
+    i += j;
+    i /= 3;
+    j = add(-1, -5);
+
+    dec32: eval = ((((2 + 3) * (6 - 4) + (8 / 2)) / (3 ^ 2) - 5) * (((7 - 1) / 2) + (4 ^ 2))) + ((12 - 6) * (3 + 1) - (9 / 3)) / (5 ^ 2) + (((3 * 7) + (15 / 5)) * (4 - 2) + 8) / (4 ^ 3);
+
+    bool: is_true = false;
+
+    if(is_true) {
+        i = 100;
+    }
+    else {
+        i = 200;
+    }
+
+    for(int32: K = 0; K < i; K++)
+    {
+        i -= K;
+    }
+
+    let: is_horizon = true, my_name = "Tushar", ret = 0;
+
+    return ret;
+}
