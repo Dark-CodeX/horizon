@@ -10,15 +10,6 @@ namespace horizon
 {
     namespace horizon_deps
     {
-        void string::exit_heap_fail(const void *ptr)
-        {
-            if (!ptr)
-            {
-                std::fprintf(stderr, "error: horizon::horizon_deps::string: cannot allocate memory on heap.\n");
-                std::exit(EXIT_FAILURE);
-            }
-        }
-
         char *&string::str_catcpy(char *&dest, const char *src, std::size_t &updating_length)
         {
             if (!dest || !src)
@@ -93,7 +84,7 @@ namespace horizon
         {
             this->len = 0;
             this->str = static_cast<char *>(std::calloc(2, sizeof(char)));
-            string::exit_heap_fail(this->str);
+            horizon_misc::misc::exit_heap_fail(this->str, "horizon::horizon_deps::string");
 
             this->str = string::str_catcpy(this->str, c, this->len);
         }
@@ -104,7 +95,7 @@ namespace horizon
             {
                 this->len = 0;
                 this->str = static_cast<char *>(std::calloc(string::str_len(src) + 1, sizeof(char)));
-                string::exit_heap_fail(this->str);
+                horizon_misc::misc::exit_heap_fail(this->str, "horizon::horizon_deps::string");
 
                 this->str = string::str_catcpy(this->str, src, this->len);
             }
@@ -121,7 +112,7 @@ namespace horizon
             {
                 this->len = 0;
                 this->str = static_cast<char *>(std::calloc(src.len + 1, sizeof(char)));
-                string::exit_heap_fail(this->str);
+                horizon_misc::misc::exit_heap_fail(this->str, "horizon::horizon_deps::string");
 
                 this->str = string::str_catcpy(this->str, src.str, this->len);
             }
@@ -147,7 +138,7 @@ namespace horizon
             {
                 this->len = 0;
                 this->str = static_cast<char *>(std::calloc((static_cast<std::size_t>(end - begin)) + 1, sizeof(char)));
-                string::exit_heap_fail(this->str);
+                horizon_misc::misc::exit_heap_fail(this->str, "horizon::horizon_deps::string");
 
                 for (const char *ptr = begin; ptr != end; ptr++)
                     this->str[this->len++] = *ptr;
@@ -163,7 +154,7 @@ namespace horizon
         {
             this->len = 0;
             this->str = static_cast<char *>(std::calloc(n + 1, sizeof(char)));
-            string::exit_heap_fail(this->str);
+            horizon_misc::misc::exit_heap_fail(this->str, "horizon::horizon_deps::string");
 
             for (; this->len < n; this->len++)
                 this->str[this->len] = c;
@@ -178,7 +169,7 @@ namespace horizon
             }
             this->len = 0;
             this->str = static_cast<char *>(std::calloc(2, sizeof(char)));
-            string::exit_heap_fail(this->str);
+            horizon_misc::misc::exit_heap_fail(this->str, "horizon::horizon_deps::string");
 
             this->str = string::str_catcpy(this->str, c, this->len);
             return *this;
@@ -195,7 +186,7 @@ namespace horizon
             {
                 this->len = 0;
                 this->str = static_cast<char *>(std::calloc(string::str_len(src) + 1, sizeof(char)));
-                string::exit_heap_fail(this->str);
+                horizon_misc::misc::exit_heap_fail(this->str, "horizon::horizon_deps::string");
 
                 this->str = string::str_catcpy(this->str, src, this->len);
             }
@@ -218,7 +209,7 @@ namespace horizon
             {
                 this->len = 0;
                 this->str = static_cast<char *>(std::calloc(src.len + 1, sizeof(char)));
-                string::exit_heap_fail(this->str);
+                horizon_misc::misc::exit_heap_fail(this->str, "horizon::horizon_deps::string");
 
                 this->str = string::str_catcpy(this->str, src.str, this->len);
             }
@@ -251,7 +242,7 @@ namespace horizon
             if (this->str)
             {
                 this->str = static_cast<char *>(std::realloc(this->str, (this->len + 2) * sizeof(char)));
-                string::exit_heap_fail(this->str);
+                horizon_misc::misc::exit_heap_fail(this->str, "horizon::horizon_deps::string");
                 this->str = string::str_init_zero(this->str, this->len, this->len + 2);
 
                 this->str[this->len++] = c;
@@ -269,7 +260,7 @@ namespace horizon
                 {
                     std::size_t src_len = string::str_len(src);
                     this->str = static_cast<char *>(std::realloc(this->str, (this->len + src_len + 1) * sizeof(char)));
-                    string::exit_heap_fail(this->str);
+                    horizon_misc::misc::exit_heap_fail(this->str, "horizon::horizon_deps::string");
                     this->str = string::str_init_zero(this->str, this->len, this->len + src_len);
 
                     this->str = string::str_catcpy(this->str, src, this->len);
@@ -287,7 +278,7 @@ namespace horizon
                 if (src.str)
                 {
                     this->str = static_cast<char *>(std::realloc(this->str, (this->len + src.len + 1) * sizeof(char)));
-                    string::exit_heap_fail(this->str);
+                    horizon_misc::misc::exit_heap_fail(this->str, "horizon::horizon_deps::string");
                     this->str = string::str_init_zero(this->str, this->len, this->len + src.len);
 
                     this->str = string::str_catcpy(this->str, src.str, this->len);
@@ -361,13 +352,13 @@ namespace horizon
                 if (this->str)
                 {
                     this->str = static_cast<char *>(std::realloc(this->str, sizeof(char) * new_length));
-                    exit_heap_fail(this->str);
+                    horizon_misc::misc::exit_heap_fail(this->str, "horizon::horizon_deps::string");
                     this->str = string::str_init_zero(this->str, this->len, new_length);
                 }
                 else
                 {
                     this->str = static_cast<char *>(std::calloc(new_length, sizeof(char)));
-                    exit_heap_fail(this->str);
+                    horizon_misc::misc::exit_heap_fail(this->str, "horizon::horizon_deps::string");
                 }
             }
             return *this;
@@ -380,7 +371,7 @@ namespace horizon
             if (sub_len == static_cast<std::size_t>(-1) || index + sub_len > this->len)
                 sub_len = this->len - index;
             char *buff = static_cast<char *>(std::calloc(sub_len + 1, sizeof(char)));
-            exit_heap_fail(buff);
+            horizon_misc::misc::exit_heap_fail(buff, "horizon::horizon_deps::string");
 
             std::memmove(buff, this->str + index, sub_len * sizeof(char));
 
@@ -421,7 +412,10 @@ namespace horizon
                 return this->str[__index];
             else
             {
-                std::fprintf(stderr, "error: horizon::horizon_deps::string: invalid memory access in %p for %zu, max was %zu\n", this->str, __index, this->len);
+                if (COLOR_ERR)
+                    std::fprintf(stderr, "horizon: " ENCLOSE(RED_FG, "error:") " " ENCLOSE(WHITE_FG, "horizon::horizon_deps::string:") " invalid memory access in %p for %zu, max was %zu\n", this->str, __index, this->len);
+                else
+                    std::fprintf(stderr, "horizon: error: horizon::horizon_deps::string: invalid memory access in %p for %zu, max was %zu\n", this->str, __index, this->len);
                 std::exit(EXIT_FAILURE);
             }
         }
@@ -432,7 +426,10 @@ namespace horizon
                 return this->str[__index];
             else
             {
-                std::fprintf(stderr, "error: horizon::horizon_deps::string: invalid memory access in %p for %zu, max was %zu\n", this->str, __index, this->len);
+                if (COLOR_ERR)
+                    std::fprintf(stderr, "horizon: " ENCLOSE(RED_FG, "error:") " " ENCLOSE(WHITE_FG, "horizon::horizon_deps::string:") " invalid memory access in %p for %zu, max was %zu\n", this->str, __index, this->len);
+                else
+                    std::fprintf(stderr, "horizon: error: horizon::horizon_deps::string: invalid memory access in %p for %zu, max was %zu\n", this->str, __index, this->len);
                 std::exit(EXIT_FAILURE);
             }
         }
@@ -594,7 +591,7 @@ namespace horizon
         string string::to_string(const unsigned int &num)
         {
             char *ptr = static_cast<char *>(std::calloc(std::numeric_limits<unsigned int>::digits10 + 1, sizeof(char)));
-            string::exit_heap_fail(ptr);
+            horizon_misc::misc::exit_heap_fail(ptr, "horizon::horizon_deps::string");
             int sn_len = std::snprintf(ptr, std::numeric_limits<unsigned int>::digits10, "%u", num);
 
             string ret;

@@ -4,6 +4,8 @@
  * @author Tushar Chaurasia (Dark-CodeX)
  */
 
+#include "../../src/misc/misc.hh"
+
 #ifndef HORIZON_DEPS_STRING_STRING_HH
 #define HORIZON_DEPS_STRING_STRING_HH
 
@@ -30,7 +32,6 @@ namespace horizon
         class string
         {
         private:
-            static void exit_heap_fail(const void *ptr);
             static char *&str_catcpy(char *&dest, const char *src, std::size_t &updating_length);
             static char *&str_catcpy(char *&dest, const char &c, std::size_t &updating_length);
             static std::size_t str_len(const char *s);

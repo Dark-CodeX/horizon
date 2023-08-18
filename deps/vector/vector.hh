@@ -11,6 +11,7 @@
 #include <utility>
 #include <cstdio>
 #include <cstdlib>
+#include "../../src/misc/misc.hh"
 
 namespace horizon
 {
@@ -33,7 +34,6 @@ namespace horizon
             std::size_t len, cap;
 
         private:
-            static void exit_heap_fail(const void *ptr);
             void init_vector(const std::size_t &N);
             void resize_vector();
 
@@ -64,20 +64,10 @@ namespace horizon
         };
 
         template <typename T>
-        void vector<T>::exit_heap_fail(const void *ptr)
-        {
-            if (!ptr)
-            {
-                std::fprintf(stderr, "error: horizon::horizon_deps::vector: cannot allocate memory on heap.\n");
-                std::exit(EXIT_FAILURE);
-            }
-        }
-
-        template <typename T>
         void vector<T>::init_vector(const std::size_t &N)
         {
             this->data = new T[N];
-            vector<T>::exit_heap_fail(this->data);
+            horizon_misc::misc::exit_heap_fail(this->data, "horizon::horizon_deps::vector");
             this->cap = N;
             this->len = 0;
         }
@@ -87,7 +77,7 @@ namespace horizon
         {
             this->cap *= 2;
             T *temp = new T[this->cap];
-            vector<T>::exit_heap_fail(temp);
+            horizon_misc::misc::exit_heap_fail(temp, "horizon::horizon_deps::vector");
             for (std::size_t i = 0; i < this->len; i++)
                 temp[i] = std::move(this->data[i]);
             delete[] this->data;
@@ -242,7 +232,7 @@ namespace horizon
             if (!this->data)
                 return *this;
             T *temp = new T[this->len];
-            vector<T>::exit_heap_fail(temp);
+            horizon_misc::misc::exit_heap_fail(temp, "horizon::horizon_deps::vector");
             for (std::size_t i = 0; i < this->len; i++)
                 temp[i] = std::move(this->data[i]);
             this->cap = this->len;
@@ -268,7 +258,10 @@ namespace horizon
         {
             if (nth < this->len && this->data)
                 return this->data[nth];
-            std::fprintf(stderr, "error: horizon::horizon_deps::vector: invalid memory access in %p for %zu, max was %zu\n", static_cast<void *>(this->data), nth, this->len);
+            if (COLOR_ERR)
+                std::fprintf(stderr, "horizon: " ENCLOSE(RED_FG, "error:") " " ENCLOSE(WHITE_FG, "horizon::horizon_deps::vector:") " invalid memory access in %p for %zu, max was %zu\n", static_cast<void *>(this->data), nth, this->len);
+            else
+                std::fprintf(stderr, "horizon: error: horizon::horizon_deps::vector: invalid memory access in %p for %zu, max was %zu\n", static_cast<void *>(this->data), nth, this->len);
             std::exit(EXIT_FAILURE);
         }
 
@@ -277,7 +270,10 @@ namespace horizon
         {
             if (nth < this->len && this->data)
                 return this->data[nth];
-            std::fprintf(stderr, "error: horizon::horizon_deps::vector: invalid memory access in %p for %zu, max was %zu\n", static_cast<void *>(this->data), nth, this->len);
+            if (COLOR_ERR)
+                std::fprintf(stderr, "horizon: " ENCLOSE(RED_FG, "error:") " " ENCLOSE(WHITE_FG, "horizon::horizon_deps::vector:") " invalid memory access in %p for %zu, max was %zu\n", static_cast<void *>(this->data), nth, this->len);
+            else
+                std::fprintf(stderr, "horizon: error: horizon::horizon_deps::vector: invalid memory access in %p for %zu, max was %zu\n", static_cast<void *>(this->data), nth, this->len);
             std::exit(EXIT_FAILURE);
         }
 
