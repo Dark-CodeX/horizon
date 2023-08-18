@@ -11,6 +11,7 @@
 #include <cstring>
 #include <cstdio>
 #include <limits>
+#include <functional>
 
 namespace horizon
 {
@@ -82,17 +83,33 @@ namespace horizon
             string &operator=(const char *src);
             string &operator=(const string &src);
             string &operator=(string &&src) noexcept(true);
+            [[nodiscard]] int lexicographical_comparison(const char *src) const;
+            [[nodiscard]] int lexicographical_comparison(const string &src) const;
             [[nodiscard]] bool operator==(const char &c) const;
             [[nodiscard]] bool operator==(const char *src) const;
             [[nodiscard]] bool operator==(const string &src) const;
             [[nodiscard]] bool operator!=(const char &c) const;
             [[nodiscard]] bool operator!=(const char *src) const;
             [[nodiscard]] bool operator!=(const string &src) const;
+            [[nodiscard]] bool operator<(const char *src) const;
+            [[nodiscard]] bool operator<(const string &src) const;
             ~string();
 
             [[nodiscard]] static string to_string(const unsigned int &num);
         };
     }
+}
+
+namespace std
+{
+    template <>
+    struct hash<horizon::horizon_deps::string>
+    {
+        std::size_t operator()(const horizon::horizon_deps::string &str) const
+        {
+            return str.hash();
+        }
+    };
 }
 
 #endif

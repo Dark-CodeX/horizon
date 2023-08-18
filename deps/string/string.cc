@@ -509,6 +509,38 @@ namespace horizon
             return *this;
         }
 
+        int string::lexicographical_comparison(const char *src) const
+        {
+            if (!src)
+                return this->len;
+            if (!this->str)
+                return this->len - string::str_len(src);
+            std::size_t slen = 0;
+            for (std::size_t i = 0; this->str[i] && src[slen]; i++, slen++)
+            {
+                if (this->str[i] == src[i])
+                    continue;
+                return (int)this->str[i] - (int)src[i];
+            }
+            return this->len - slen;
+        }
+
+        int string::lexicographical_comparison(const string &src) const
+        {
+            if (!src.str)
+                return this->len;
+            if (!this->str)
+                return this->len - src.len;
+            std::size_t slen = 0;
+            for (std::size_t i = 0; this->str[i] && src[slen]; i++, slen++)
+            {
+                if (this->str[i] == src[i])
+                    continue;
+                return (int)this->str[i] - (int)src[i];
+            }
+            return this->len - slen;
+        }
+
         bool string::operator==(const char &c) const
         {
             return this->compare(c);
@@ -537,6 +569,16 @@ namespace horizon
         bool string::operator!=(const string &src) const
         {
             return !this->compare(src);
+        }
+
+        bool string::operator<(const char *src) const
+        {
+            return this->lexicographical_comparison(src) < 0;
+        }
+
+        bool string::operator<(const string &src) const
+        {
+            return this->lexicographical_comparison(src) < 0;
         }
 
         string::~string()
