@@ -19,6 +19,7 @@
 #include "../token_type/token_type.hh"
 #include "../errors/errors.hh"
 #include "../colorize/colorize.h"
+#include "../misc/file/file.hh"
 
 namespace horizon
 {
@@ -26,11 +27,10 @@ namespace horizon
     {
         class lexer
         {
-        private:                                        // non-static class variables
+        private:                                  // non-static class variables
             horizon_deps::vector<token> M_tokens; // contains tokens
 
-            horizon_deps::string M_file_location; // current file location
-            horizon_deps::string M_file;          // content of file
+            horizon_misc::HR_FILE *M_file;
 
             std::size_t M_line; // current line, just for reporting errors
 
@@ -41,10 +41,6 @@ namespace horizon
             char M_invalid_ec; // stores any invalid escape seq.
 
         private:
-            [[nodiscard]] bool load_file();
-
-            void clear_memory();
-
             [[nodiscard]] bool scan_tokens();
             void append_token(const token_type &type);
 
@@ -70,14 +66,14 @@ namespace horizon
 
             bool handle_integer_decimal();
             void handle_identifier();
-            [[nodiscard]] error_code handle_comments();
-            [[nodiscard]] error_code handle_char();
-            [[nodiscard]] error_code handle_string();
+            [[nodiscard]] horizon_errors::error_code handle_comments();
+            [[nodiscard]] horizon_errors::error_code handle_char();
+            [[nodiscard]] horizon_errors::error_code handle_string();
 
             [[nodiscard]] std::size_t check_brackets() const;
 
         public: // non-static class functions
-            lexer(const horizon_deps::string &location);
+            lexer(horizon_misc::HR_FILE *file);
 
             [[nodiscard]] bool init_lexing();
 

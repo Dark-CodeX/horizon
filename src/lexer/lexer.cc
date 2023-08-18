@@ -10,43 +10,6 @@ namespace horizon
 {
     namespace horizon_lexer
     {
-        bool lexer::load_file()
-        {
-            std::FILE *fptr = std::fopen(this->M_file_location.c_str(), "rb");
-            if (!fptr)
-            {
-                if (COLOR_ERR)
-                    std::fprintf(stderr, "horizon: lexer: " ENCLOSE(RED_FG, "error[E0]:") " " ENCLOSE(WHITE_FG, "'%s'") " cannot be opened for reading: %s\n", this->M_file_location.c_str(), std::strerror(errno));
-                else
-                    std::fprintf(stderr, "horizon: lexer: error[E0]: '%s' cannot be opened for reading: %s\n", this->M_file_location.c_str(), std::strerror(errno));
-                return false;
-            }
-            std::fseek(fptr, 0, SEEK_END);
-            std::size_t len = std::ftell(fptr);
-            std::fseek(fptr, 0, SEEK_SET);
-
-            this->M_file.resize(len + 1);
-
-            if (std::fread(this->M_file.raw(), sizeof(char), len, fptr) != len)
-            {
-                if (COLOR_ERR)
-                    std::fprintf(stderr, "horizon: lexer: " ENCLOSE(RED_FG, "error[E0]:") " " ENCLOSE(WHITE_FG, "'%s'") " not every byte was read: %s\n", this->M_file_location.c_str(), std::strerror(errno));
-                else
-                    std::fprintf(stderr, "horizon: lexer: error[E0]: '%s' not every byte was read: %s\n", this->M_file_location.c_str(), std::strerror(errno));
-                return false;
-            }
-            std::fclose(fptr);
-            this->M_file.length() = len;
-            return true;
-        }
-
-        void lexer::clear_memory()
-        {
-            this->M_file.clear();
-            this->M_file_location.clear();
-            this->M_tokens.shrink_to_fit();
-        }
-
         bool lexer::scan_tokens()
         {
             while (!this->has_reached_eof())
@@ -320,48 +283,48 @@ namespace horizon
                 default:
                     if (this->M_ch == '`')
                     {
-                        error_code ecode = this->handle_comments();
-                        if (ecode == error_code::HORIZON_MISSING_TERMINATING_CHAR)
+                        horizon_errors::error_code ecode = this->handle_comments();
+                        if (ecode == horizon_errors::error_code::HORIZON_MISSING_TERMINATING_CHAR)
                         {
-                            errors::lexer_draw_error(ecode, this->M_file_location, this->M_line, this->M_start_lexer, this->M_current_lexer, {"unterminated comment", "expected `"}, this->M_file);
+                            horizon_errors::errors::lexer_draw_error(ecode, this->M_file, this->M_line, this->M_start_lexer, this->M_current_lexer, {"unterminated comment", "expected `"});
                             return false;
                         }
                     }
                     else if (this->M_ch == '"')
                     {
-                        error_code ecode = this->handle_string();
-                        if (ecode == error_code::HORIZON_INVALID_ESCAPE_SEQUENCE)
+                        horizon_errors::error_code ecode = this->handle_string();
+                        if (ecode == horizon_errors::error_code::HORIZON_INVALID_ESCAPE_SEQUENCE)
                         {
-                            errors::lexer_draw_error(ecode, this->M_file_location, this->M_line, this->M_start_lexer, this->M_current_lexer, {"invalid escape sequence", horizon_deps::string("\\") + this->M_invalid_ec}, this->M_file);
+                            horizon_errors::errors::lexer_draw_error(ecode, this->M_file, this->M_line, this->M_start_lexer, this->M_current_lexer, {"invalid escape sequence", horizon_deps::string("\\") + this->M_invalid_ec});
                             return false;
                         }
-                        else if (ecode == error_code::HORIZON_MISSING_TERMINATING_CHAR)
+                        else if (ecode == horizon_errors::error_code::HORIZON_MISSING_TERMINATING_CHAR)
                         {
-                            errors::lexer_draw_error(ecode, this->M_file_location, this->M_line, this->M_start_lexer, this->M_current_lexer, {"missing terminating character", "expected", "\""}, this->M_file);
+                            horizon_errors::errors::lexer_draw_error(ecode, this->M_file, this->M_line, this->M_start_lexer, this->M_current_lexer, {"missing terminating character", "expected", "\""});
                             return false;
                         }
                     }
                     else if (this->M_ch == '\'')
                     {
-                        error_code ecode = this->handle_char();
-                        if (ecode == error_code::HORIZON_INVALID_ESCAPE_SEQUENCE)
+                        horizon_errors::error_code ecode = this->handle_char();
+                        if (ecode == horizon_errors::error_code::HORIZON_INVALID_ESCAPE_SEQUENCE)
                         {
-                            errors::lexer_draw_error(ecode, this->M_file_location, this->M_line, this->M_start_lexer, this->M_current_lexer, {"invalid escape sequence", horizon_deps::string("\\") + this->M_invalid_ec}, this->M_file);
+                            horizon_errors::errors::lexer_draw_error(ecode, this->M_file, this->M_line, this->M_start_lexer, this->M_current_lexer, {"invalid escape sequence", horizon_deps::string("\\") + this->M_invalid_ec});
                             return false;
                         }
-                        else if (ecode == error_code::HORIZON_MISSING_TERMINATING_CHAR)
+                        else if (ecode == horizon_errors::error_code::HORIZON_MISSING_TERMINATING_CHAR)
                         {
-                            errors::lexer_draw_error(ecode, this->M_file_location, this->M_line, this->M_start_lexer, this->M_current_lexer, {"missing terminating character", "expected", "'"}, this->M_file);
+                            horizon_errors::errors::lexer_draw_error(ecode, this->M_file, this->M_line, this->M_start_lexer, this->M_current_lexer, {"missing terminating character", "expected", "'"});
                             return false;
                         }
-                        else if (ecode == error_code::HORIZON_LESS_BYTES)
+                        else if (ecode == horizon_errors::error_code::HORIZON_LESS_BYTES)
                         {
-                            errors::lexer_draw_error(ecode, this->M_file_location, this->M_line, this->M_start_lexer, this->M_current_lexer, {"empty character constant"}, this->M_file);
+                            horizon_errors::errors::lexer_draw_error(ecode, this->M_file, this->M_line, this->M_start_lexer, this->M_current_lexer, {"empty character constant"});
                             return false;
                         }
-                        else if (ecode == error_code::HORIZON_MORE_BYTES)
+                        else if (ecode == horizon_errors::error_code::HORIZON_MORE_BYTES)
                         {
-                            errors::lexer_draw_error(error_code::HORIZON_MORE_BYTES, this->M_file_location, this->M_line, this->M_start_lexer, this->M_current_lexer, {"multi-character character constant"}, this->M_file);
+                            horizon_errors::errors::lexer_draw_error(horizon_errors::error_code::HORIZON_MORE_BYTES, this->M_file, this->M_line, this->M_start_lexer, this->M_current_lexer, {"multi-character character constant"});
                         }
                     }
                     else if (std::isdigit(this->M_ch))
@@ -382,7 +345,7 @@ namespace horizon
                     }
                     else
                     {
-                        errors::lexer_draw_error(error_code::HORIZON_UNKNOWN_TOKEN, this->M_file_location, this->M_line, this->M_start_lexer, this->M_current_lexer, {"unrecognized token", this->M_ch}, this->M_file);
+                        horizon_errors::errors::lexer_draw_error(horizon_errors::error_code::HORIZON_UNKNOWN_TOKEN, this->M_file, this->M_line, this->M_start_lexer, this->M_current_lexer, {"unrecognized token", this->M_ch});
                         return false;
                     }
                     break;
@@ -393,7 +356,7 @@ namespace horizon
 
         void lexer::append_token(const token_type &type)
         {
-            horizon_deps::string temp(this->M_file.substr(this->M_start_lexer, this->M_current_lexer - this->M_start_lexer));
+            horizon_deps::string temp(this->M_file->M_content.substr(this->M_start_lexer, this->M_current_lexer - this->M_start_lexer));
             if (type == token_type::TOKEN_IDENTIFIER)
             {
                 if (is_keyword(temp.c_str()))
@@ -409,12 +372,12 @@ namespace horizon
 
         bool lexer::has_reached_eof() const
         {
-            return this->M_current_lexer >= this->M_file.length();
+            return this->M_current_lexer >= this->M_file->M_content.length();
         }
 
         void lexer::post_advance_lexer()
         {
-            this->M_ch = this->M_file[this->M_current_lexer++];
+            this->M_ch = this->M_file->M_content[this->M_current_lexer++];
             if (this->M_ch == '\n')
             {
                 this->M_line++;
@@ -427,13 +390,13 @@ namespace horizon
             {
                 this->M_line++;
             }
-            this->M_ch = this->M_file[++this->M_current_lexer];
+            this->M_ch = this->M_file->M_content[++this->M_current_lexer];
         }
 
         void lexer::load_char()
         {
             char temp_ch = this->M_ch;
-            this->M_ch = this->M_file[this->M_current_lexer];
+            this->M_ch = this->M_file->M_content[this->M_current_lexer];
             if (temp_ch != this->M_ch)
             {
                 if (this->M_ch == '\n')
@@ -501,7 +464,7 @@ namespace horizon
             this->append_token(token_type::TOKEN_IDENTIFIER);
         }
 
-        error_code lexer::handle_comments()
+        horizon_errors::error_code lexer::handle_comments()
         {
             std::size_t starting_line = this->M_line;
             this->pre_advance_lexer();
@@ -513,13 +476,13 @@ namespace horizon
             {
                 this->M_current_lexer = this->M_start_lexer;
                 this->M_line = starting_line;
-                return error_code::HORIZON_MISSING_TERMINATING_CHAR;
+                return horizon_errors::error_code::HORIZON_MISSING_TERMINATING_CHAR;
             }
             this->pre_advance_lexer(); // skip `
-            return error_code::HORIZON_NO_ERROR;
+            return horizon_errors::error_code::HORIZON_NO_ERROR;
         }
 
-        error_code lexer::handle_char()
+        horizon_errors::error_code lexer::handle_char()
         {
             horizon_deps::string temp_str = "";
             this->pre_advance_lexer();
@@ -585,33 +548,33 @@ namespace horizon
             }
             if (this->M_ch != '\'')
             {
-                return error_code::HORIZON_MISSING_TERMINATING_CHAR;
+                return horizon_errors::error_code::HORIZON_MISSING_TERMINATING_CHAR;
             }
             else if (temp_str.length() == 0)
             {
                 this->pre_advance_lexer();
-                return error_code::HORIZON_LESS_BYTES;
+                return horizon_errors::error_code::HORIZON_LESS_BYTES;
             }
             else if (was_invalid_es)
             {
                 this->pre_advance_lexer();
-                return error_code::HORIZON_INVALID_ESCAPE_SEQUENCE;
+                return horizon_errors::error_code::HORIZON_INVALID_ESCAPE_SEQUENCE;
             }
             else if (temp_str.length() == 1)
             {
                 this->pre_advance_lexer();
                 this->M_tokens.add(token{token_type::TOKEN_CHAR_LITERAL, std::move(temp_str), this->M_start_lexer, this->M_current_lexer});
-                return error_code::HORIZON_NO_ERROR;
+                return horizon_errors::error_code::HORIZON_NO_ERROR;
             }
             else
             {
                 this->pre_advance_lexer();
                 this->M_tokens.add(token{token_type::TOKEN_INTEGER_LITERAL, std::move(horizon_deps::string::to_string(temp_str.multichar_uint())), this->M_start_lexer, this->M_current_lexer});
-                return error_code::HORIZON_MORE_BYTES;
+                return horizon_errors::error_code::HORIZON_MORE_BYTES;
             }
         }
 
-        error_code lexer::handle_string()
+        horizon_errors::error_code lexer::handle_string()
         {
             horizon_deps::string temp_str = "";
             bool was_invalid_es = false;
@@ -676,12 +639,12 @@ namespace horizon
                 this->pre_advance_lexer();
             }
             if (this->M_ch != '"')
-                return error_code::HORIZON_MISSING_TERMINATING_CHAR;
+                return horizon_errors::error_code::HORIZON_MISSING_TERMINATING_CHAR;
             this->pre_advance_lexer();
             this->M_tokens.add(token{token_type::TOKEN_STRING_LITERAL, std::move(temp_str), this->M_start_lexer, this->M_current_lexer});
             if (was_invalid_es)
-                return error_code::HORIZON_INVALID_ESCAPE_SEQUENCE;
-            return error_code::HORIZON_NO_ERROR;
+                return horizon_errors::error_code::HORIZON_INVALID_ESCAPE_SEQUENCE;
+            return horizon_errors::error_code::HORIZON_NO_ERROR;
         }
 
         std::size_t lexer::check_brackets() const
@@ -715,9 +678,9 @@ namespace horizon
             return (s.empty()) ? static_cast<std::size_t>(-1) : s.top().first;
         }
 
-        lexer::lexer(const horizon_deps::string &location)
+        lexer::lexer(horizon_misc::HR_FILE *file)
         {
-            this->M_file_location = location;
+            this->M_file = file;
             this->M_line = 1;
             this->M_current_lexer = 0;
             this->M_start_lexer = 0;
@@ -725,21 +688,19 @@ namespace horizon
 
         bool lexer::init_lexing()
         {
-            if (!this->load_file())
-                return false;
-            this->M_ch = this->M_file[this->M_current_lexer];
+            this->M_ch = this->M_file->M_content[this->M_current_lexer];
             if (!this->scan_tokens())
                 return false;
             this->M_tokens.add(token{token_type::TOKEN_END_OF_FILE, nullptr, static_cast<std::size_t>(-1), static_cast<std::size_t>(-1)});
             std::size_t invalid_bracket_pos = this->check_brackets();
             if (invalid_bracket_pos != static_cast<std::size_t>(-1))
             {
-                errors::lexer_draw_error(error_code::HORIZON_INVALID_BRACKET, this->M_file_location, errors::getline_no(this->M_file, this->M_tokens[invalid_bracket_pos].M_start),
-                                         this->M_tokens[invalid_bracket_pos].M_start,
-                                         this->M_tokens[invalid_bracket_pos].M_end, {"invalid or unexpected bracket", this->M_tokens[invalid_bracket_pos].M_lexeme}, this->M_file);
+                horizon_errors::errors::lexer_draw_error(horizon_errors::error_code::HORIZON_INVALID_BRACKET, this->M_file, horizon_errors::errors::getline_no(this->M_file->M_content, this->M_tokens[invalid_bracket_pos].M_start),
+                                                         this->M_tokens[invalid_bracket_pos].M_start,
+                                                         this->M_tokens[invalid_bracket_pos].M_end, {"invalid or unexpected bracket", this->M_tokens[invalid_bracket_pos].M_lexeme});
                 return false;
             }
-            this->clear_memory();
+            this->M_tokens.shrink_to_fit();
             return true;
         }
 
