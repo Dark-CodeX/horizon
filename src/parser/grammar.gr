@@ -1,5 +1,7 @@
 <program>                               ::=     <declaration_list>
 
+<empty_declaration>                     ::=     "{" <declaration_list> "}"
+
 <block_declaration>                     ::=     "block" <identifier> "{" <declaration_list> "}"
 
 <scope_declaration>                     ::=     <identifier_list> "{" <declaration_list> "}" 
