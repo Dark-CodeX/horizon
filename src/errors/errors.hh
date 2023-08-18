@@ -13,30 +13,40 @@
 #include "../../deps/vector/vector.hh"
 #include "../colorize/colorize.h"
 #include "../defines/defines.h"
+#include "../token/token.hh"
+#include "../misc/file/file.hh"
 
 namespace horizon
 {
-    enum class error_code : unsigned
+    namespace horizon_errors
     {
-        HORIZON_IO_ERROR,
-        HORIZON_UNKNOWN_TOKEN,
-        HORIZON_INVALID_ESCAPE_SEQUENCE,
-        HORIZON_MISSING_TERMINATING_CHAR,
-        HORIZON_LESS_BYTES,
-        HORIZON_MORE_BYTES,
-        HORIZON_INVALID_BRACKET,
-        HORIZON_NO_ERROR
-    };
+        enum class error_code : unsigned
+        {
+            HORIZON_IO_ERROR = 1U,
+            HORIZON_UNKNOWN_TOKEN,
+            HORIZON_INVALID_ESCAPE_SEQUENCE,
+            HORIZON_MISSING_TERMINATING_CHAR,
+            HORIZON_LESS_BYTES,
+            HORIZON_MORE_BYTES,
+            HORIZON_INVALID_BRACKET,
 
-    class errors
-    {
-    public:
-        [[nodiscard]] static std::pair<horizon_deps::string, std::size_t> getline(const horizon_deps::string &str, const std::size_t &start, const std::size_t &end__, const horizon_deps::string &color);
+            HORIZON_SYNTAX_ERROR = 10U,
 
-        [[nodiscard]] static std::size_t getline_no(const horizon_deps::string &str, const std::size_t &start);
+            HORIZON_NO_ERROR
+        };
 
-        static void lexer_draw_error(const error_code &code, const horizon_deps::string &file_loc, const std::size_t &line_no, const std::size_t &start, const std::size_t &end, const horizon_deps::vector<horizon_deps::string> &err_msg, const horizon_deps::string &file);
-    };
+        class errors
+        {
+        public:
+            [[nodiscard]] static std::pair<horizon_deps::string, std::size_t> getline(const horizon_deps::string &str, const std::size_t &start, const std::size_t &end__, const horizon_deps::string &color);
+
+            [[nodiscard]] static std::size_t getline_no(const horizon_deps::string &str, const std::size_t &start);
+
+            static void lexer_draw_error(const error_code &code, const horizon_misc::HR_FILE *file, const std::size_t &line_no, const std::size_t &start, const std::size_t &end, const horizon_deps::vector<horizon_deps::string> &err_msg);
+
+            static void parser_draw_error(const error_code &code, const horizon_misc::HR_FILE *file, const token &tok, const horizon_deps::vector<horizon_deps::string> &err_msg);
+        };
+    }
 }
 
 #endif
