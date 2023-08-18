@@ -21,12 +21,13 @@ namespace horizon
             function_declaration fd;
             if (this->M_tokens[this->M_current_parser].M_type != token_type::TOKEN_IDENTIFIER)
             {
-                horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->M_tokens[this->M_current_parser], {});
+                horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->M_tokens[this->M_current_parser], {"expected an identifier, but got", this->M_tokens[this->M_current_parser].M_lexeme});
                 return false;
             }
             fd.M_identifier = this->M_tokens[this->M_current_parser++].M_lexeme;
             if (this->M_tokens[this->M_current_parser].M_type != token_type::TOKEN_LEFT_PAREN)
             {
+                horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->M_tokens[this->M_current_parser], {"expected '(', but got", this->M_tokens[this->M_current_parser].M_lexeme});
                 return false;
             }
             this->M_current_parser++;
@@ -36,11 +37,15 @@ namespace horizon
                 while (this->M_tokens[this->M_current_parser].M_type != token_type::TOKEN_COLON && !this->has_reached_end())
                 {
                     if (this->M_tokens[this->M_current_parser].M_type != token_type::TOKEN_IDENTIFIER && this->M_tokens[this->M_current_parser].M_type != token_type::TOKEN_PRIMARY_TYPE)
+                    {
+                        horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->M_tokens[this->M_current_parser], {"expected an identifier, but got", this->M_tokens[this->M_current_parser].M_lexeme});
                         return false;
+                    }
                     temp_type_vec.add(this->M_tokens[this->M_current_parser++].M_lexeme);
                 }
                 if (this->M_tokens[this->M_current_parser].M_type != token_type::TOKEN_COLON)
                 {
+                    horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->M_tokens[this->M_current_parser], {"expected ':', but got", this->M_tokens[this->M_current_parser].M_lexeme});
                     return false;
                 }
                 this->M_current_parser++;
