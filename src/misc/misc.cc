@@ -18,20 +18,16 @@ namespace horizon
                 return nullptr;
             }
             HR_FILE *file = new HR_FILE();
-            if (!file)
-            {
-                std::fprintf(stderr, "error: horizon::horizon_misc::load_file: cannot allocate memory on heap.\n");
-                std::exit(EXIT_FAILURE);
-            }
+            misc::exit_heap_fail(file, "horizon::horizon_misc::load_file");
             file->M_location = loc;
             std::FILE *fptr = std::fopen(loc, "rb");
             if (!fptr)
             {
                 delete file;
                 if (COLOR_ERR)
-                    std::fprintf(stderr, "horizon: " ENCLOSE(RED_FG, "error[E0]:") " " ENCLOSE(WHITE_FG, "'%s'") " cannot be opened for reading: %s\n", loc, std::strerror(errno));
+                    std::fprintf(stderr, "horizon: " ENCLOSE(RED_FG, "error[E1]:") " " ENCLOSE(WHITE_FG, "'%s'") " cannot be opened for reading: %s\n", loc, std::strerror(errno));
                 else
-                    std::fprintf(stderr, "horizon: error[E0]: '%s' cannot be opened for reading: %s\n", loc, std::strerror(errno));
+                    std::fprintf(stderr, "horizon: error[E1]: '%s' cannot be opened for reading: %s\n", loc, std::strerror(errno));
                 return nullptr;
             }
 
@@ -45,14 +41,26 @@ namespace horizon
                 std::fclose(fptr);
                 delete file;
                 if (COLOR_ERR)
-                    std::fprintf(stderr, "horizon: " ENCLOSE(RED_FG, "error[E0]:") " " ENCLOSE(WHITE_FG, "'%s'") " not every byte was read: %s\n", loc, std::strerror(errno));
+                    std::fprintf(stderr, "horizon: " ENCLOSE(RED_FG, "error[E1]:") " " ENCLOSE(WHITE_FG, "'%s'") " not every byte was read: %s\n", loc, std::strerror(errno));
                 else
-                    std::fprintf(stderr, "horizon: error[E0]: '%s' not every byte was read: %s\n", loc, std::strerror(errno));
+                    std::fprintf(stderr, "horizon: error[E1]: '%s' not every byte was read: %s\n", loc, std::strerror(errno));
                 return nullptr;
             }
             file->M_content.length() = LEN;
             std::fclose(fptr);
             return file;
+        }
+
+        void misc::exit_heap_fail(const void *ptr, const char *__s)
+        {
+            if (!ptr)
+            {
+                if (COLOR_ERR)
+                    std::fprintf(stderr, "horizon: " ENCLOSE(RED_FG, "error:") " " ENCLOSE(WHITE_FG, "%s:") " cannot allocate memory on heap.\n", __s);
+                else
+                    std::fprintf(stderr, "horizon: error: %s: cannot allocate memory on heap.\n", __s);
+                std::exit(EXIT_FAILURE);
+            }
         }
     }
 }

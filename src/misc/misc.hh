@@ -7,10 +7,10 @@
 #ifndef HORIZON_MISC_MISC_HH
 #define HORIZON_MISC_MISC_HH
 
-#include "./file/file.hh"
 #include <cstdio>
 #include <cerrno>
 
+#include "./file/file.hh"
 #include "../../deps/string/string.hh"
 #include "../colorize/colorize.h"
 #include "../defines/defines.h"
@@ -23,6 +23,7 @@ namespace horizon
         {
         public:
             [[nodiscard]] static HR_FILE *load_file(const char *loc);
+            static void exit_heap_fail(const void *ptr, const char *__s);
         };
     }
 }
