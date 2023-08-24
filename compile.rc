@@ -1,37 +1,63 @@
-depends('g++')
-depends('rm')
-depends('mkdir')
-depends('./src/defines/defines.h')
-depends('./src/defines/keywords_primary_data_types.cc')
-depends('./src/defines/keywords_primary_data_types.h')
-depends('./src/entry/horizon.cc')
-depends('./src/errors/errors.cc')
-depends('./src/errors/errors.hh')
-depends('./src/token/token.hh')
-depends('./src/token_type/token_type.hh')
-depends('./src/lexer/lexer.cc')
-depends('./src/lexer/lexer.hh')
-depends('./src/parser/parser.cc')
-depends('./src/parser/parser.hh')
+if os != 'windows'
+    depends('g++')
+    depends('rm')
+    depends('mkdir')
+    depends('strip')
+else
+    depends('cl.exe')
+    depends('./bin')
+endif
+
+# DEPS
 depends('./deps/string/string.cc')
 depends('./deps/string/string.hh')
 depends('./deps/vector/vector.hh')
+depends('./deps/sptr/sptr.hh')
+
+# SRC
 depends('./src/colorize/colorize.cc')
 depends('./src/colorize/colorize.h')
-depends('./src/misc/misc.cc')
-depends('./src/misc/misc.hh')
+
+depends('./src/defines/defines.h')
+depends('./src/defines/keywords_primary_data_types.cc')
+depends('./src/defines/keywords_primary_data_types.h')
+
+depends('./src/entry/horizon.cc')
+
+depends('./src/errors/errors.cc')
+depends('./src/errors/errors.hh')
+
+depends('./src/lexer/lexer.cc')
+depends('./src/lexer/lexer.hh')
+
 depends('./src/misc/file/file.hh')
+depends('./src/misc/exit_heap_fail.hh')
+depends('./src/misc/load_file.hh')
+depends('./src/misc/misc.cc')
+
+depends('./src/parser/function_declaration/function_declaration.hh')
+depends('./src/parser/grammar.gr')
+depends('./src/parser/parser.cc')
+depends('./src/parser/parser.hh')
+
+depends('./src/token/token.hh')
+depends('./src/token_type/token_type.hh')
+
+# Targets
 
 [compiler]:
-    compiler = 'g++'
+    if os == 'windows'
+        compiler = 'cl.exe'
+    else
+        compiler = 'g++'
+    endif
 
 [arguments]:
-    if os_arch == '32'
-        release_args = ['-std=c++23', '-m32', '-O3', '-DNDEBUG', '-march=native', '-mtune=native', '-masm=intel']
-        debug_args = ['-std=c++23', '-m32', '-g', '-ggdb3', '-Wall', '-Wextra', '-Wuninitialized', '-Wstrict-aliasing', '-Wshadow', '-pedantic', '-Wmissing-declarations', '-Wmissing-include-dirs', '-Wnoexcept', '-Wunused']
+    if os == 'windows'
+        release_args = ['/std:c++latest', '/O2', '/DNDEBUG', '/EHsc']
     else
-        release_args = ['-std=c++23', '-m64', '-O3', '-DNDEBUG', '-march=native', '-mtune=native', '-masm=intel']
-        debug_args = ['-std=c++23', '-m64', '-g', '-ggdb3', '-Wall', '-Wextra', '-Wuninitialized', '-Wstrict-aliasing', '-Wshadow', '-pedantic', '-Wmissing-declarations', '-Wmissing-include-dirs', '-Wnoexcept', '-Wunused']
+        release_args = ['-std=c++23', '-O3', '-DNDEBUG', '-march=native', '-mtune=native', '-masm=intel']
+        debug_args = ['-std=c++23', '-g', '-pg', '-ggdb3', '-Wall', '-Wextra', '-Wuninitialized', '-Wstrict-aliasing', '-Wshadow', '-pedantic', '-Wmissing-declarations', '-Wmissing-include-dirs', '-Wnoexcept', '-Wunused']
     endif
 
 [sources]:
@@ -45,17 +71,20 @@ depends('./src/misc/file/file.hh')
     8 = './src/defines/keywords_primary_data_types.cc'
 
 [output]:
-    release = ['-o', './bin/horizon']
-    debug = ['-o', './bin/horizon_debug']
+    if os == 'windows'
+        release = ['/Fo./bin/', '/Fe./bin/horizon']
+    else
+        release = ['-o', './bin/horizon']
+        debug = ['-o', './bin/horizon_debug']
+    endif
 
 [clean]:
     cmd = ['rm', './bin/horizon', './bin/horizon_debug']
 
-[make_dir]:
-    cmd = ['mkdir', '-p', './bin']
-
-[strip]:
-    cmd = ['strip', './bin/horizon']
+if os != 'windows'
+    [strip]:
+        cmd = ['strip', './bin/horizon']
+endif
 
 [release]:
     compiler()
@@ -63,17 +92,27 @@ depends('./src/misc/file/file.hh')
     sources()
     output()[0]
 
-[debug]:
-    compiler()
-    arguments()[1]
-    sources()
-    output()[1]
+if os != 'windows'
+    [debug]:
+        compiler()
+        arguments()[1]
+        sources()
+        output()[1]
+endif
 
 [run]:
-    cmd = ['./bin/horizon_debug', './sample/expr.hr']
+    if os == 'windows'
+        cmd = ['./bin/horizon', './sample/expr.hr']
+    else
+        cmd = ['./bin/horizon_debug', './sample/expr.hr']
+    endif
 
 [all]:
-    make_dir()
+    if os != 'windows'
+        make_dir = ['mkdir', '-p', './bin']
+    endif
     release()
-    debug()
-    strip()
+    if os != 'windows'
+        debug()
+        strip()
+    endif
