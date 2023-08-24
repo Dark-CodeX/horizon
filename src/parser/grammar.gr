@@ -136,6 +136,8 @@
 
 <char_literal>                          ::=     "'" <character> "'"
 
+<character>                             ::=     ...
+
 <operator>                              ::=     "+"
                                                 | "-"
                                                 | "*"
