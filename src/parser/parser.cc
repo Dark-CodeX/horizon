@@ -51,11 +51,13 @@ namespace horizon
                 this->M_current_parser++;
                 if (this->M_tokens[this->M_current_parser].M_type != token_type::TOKEN_IDENTIFIER)
                 {
+                    horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->M_tokens[this->M_current_parser], {"expected an identifier, but got", this->M_tokens[this->M_current_parser].M_lexeme});
                     return false;
                 }
                 const std::pair<std::map<horizon_deps::string, horizon_deps::vector<horizon_deps::string>>::iterator, bool> &iter = fd.M_parameter.M_container.insert({this->M_tokens[this->M_current_parser].M_lexeme, std::move(temp_type_vec)});
                 if (!iter.second)
                 {
+                    horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->M_tokens[this->M_current_parser], {this->M_tokens[this->M_current_parser].M_lexeme, "is already defined"});
                     return false;
                 }
                 this->M_current_parser++;
@@ -75,7 +77,10 @@ namespace horizon
                 while (this->M_tokens[this->M_current_parser].M_type != token_type::TOKEN_LEFT_BRACE && !this->has_reached_end())
                 {
                     if (this->M_tokens[this->M_current_parser].M_type != token_type::TOKEN_IDENTIFIER && this->M_tokens[this->M_current_parser].M_type != token_type::TOKEN_PRIMARY_TYPE)
+                    {
+                        horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->M_tokens[this->M_current_parser], {"expected an identifier, but got", this->M_tokens[this->M_current_parser].M_lexeme});
                         return false;
+                    }
                     temp_ret_vec.add(this->M_tokens[this->M_current_parser++].M_lexeme);
                 }
                 fd.M_return_type = std::move(temp_ret_vec);
