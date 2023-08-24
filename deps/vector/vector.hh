@@ -11,7 +11,8 @@
 #include <utility>
 #include <cstdio>
 #include <cstdlib>
-#include "../../src/misc/misc.hh"
+
+#include "../../src/misc/exit_heap_fail.hh"
 
 namespace horizon
 {
@@ -67,7 +68,7 @@ namespace horizon
         void vector<T>::init_vector(const std::size_t &N)
         {
             this->data = new T[N];
-            horizon_misc::misc::exit_heap_fail(this->data, "horizon::horizon_deps::vector");
+            horizon_misc::exit_heap_fail(this->data, "horizon::horizon_deps::vector");
             this->cap = N;
             this->len = 0;
         }
@@ -77,7 +78,7 @@ namespace horizon
         {
             this->cap *= 2;
             T *temp = new T[this->cap];
-            horizon_misc::misc::exit_heap_fail(temp, "horizon::horizon_deps::vector");
+            horizon_misc::exit_heap_fail(temp, "horizon::horizon_deps::vector");
             for (std::size_t i = 0; i < this->len; i++)
                 temp[i] = std::move(this->data[i]);
             delete[] this->data;
@@ -232,7 +233,7 @@ namespace horizon
             if (!this->data)
                 return *this;
             T *temp = new T[this->len];
-            horizon_misc::misc::exit_heap_fail(temp, "horizon::horizon_deps::vector");
+            horizon_misc::exit_heap_fail(temp, "horizon::horizon_deps::vector");
             for (std::size_t i = 0; i < this->len; i++)
                 temp[i] = std::move(this->data[i]);
             this->cap = this->len;

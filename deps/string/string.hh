@@ -4,7 +4,6 @@
  * @author Tushar Chaurasia (Dark-CodeX)
  */
 
-#include "../../src/misc/misc.hh"
 
 #ifndef HORIZON_DEPS_STRING_STRING_HH
 #define HORIZON_DEPS_STRING_STRING_HH
@@ -14,6 +13,9 @@
 #include <cstdio>
 #include <limits>
 #include <functional>
+
+#include "../../src/misc/exit_heap_fail.hh"
+#include "../../src/defines/defines.h"
 
 namespace horizon
 {
