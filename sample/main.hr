@@ -1,4 +1,8 @@
-func add(const ref int32: a, const ref int32: b): int32 {
+func add(int32: a, int32: $2231): int32 {
+    return a + b;
+}
+
+func add_template<T>(T: a, T: a): T {
     return a + b;
 }
 
