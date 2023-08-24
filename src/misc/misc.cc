@@ -4,13 +4,14 @@
  * @author Tushar Chaurasia (Dark-CodeX)
  */
 
-#include "./misc.hh"
+#include "./load_file.hh"
+#include "./exit_heap_fail.hh"
 
 namespace horizon
 {
     namespace horizon_misc
     {
-        HR_FILE *misc::load_file(const char *loc)
+        horizon_deps::sptr<HR_FILE> load_file(const char *loc)
         {
             if (!loc)
             {
@@ -18,7 +19,7 @@ namespace horizon
                 return nullptr;
             }
             HR_FILE *file = new HR_FILE();
-            misc::exit_heap_fail(file, "horizon::horizon_misc::load_file");
+            exit_heap_fail(file, "horizon::horizon_misc::load_file");
             file->M_location = loc;
             std::FILE *fptr = std::fopen(loc, "rb");
             if (!fptr)
@@ -51,7 +52,7 @@ namespace horizon
             return file;
         }
 
-        void misc::exit_heap_fail(const void *ptr, const char *__s)
+        void exit_heap_fail(const void *ptr, const char *__s)
         {
             if (!ptr)
             {
