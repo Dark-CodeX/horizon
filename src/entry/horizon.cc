@@ -6,7 +6,7 @@
 
 #include "../lexer/lexer.hh"
 #include "../parser/parser.hh"
-#include "../misc/misc.hh"
+#include "../misc/load_file.hh"
 
 int main(int argc, char **argv)
 {
@@ -23,35 +23,25 @@ int main(int argc, char **argv)
         return EXIT_FAILURE;
     }
 
-    horizon::horizon_misc::HR_FILE *file = horizon::horizon_misc::misc::load_file(argv[1]);
+    horizon::horizon_deps::sptr<horizon::horizon_misc::HR_FILE> file = horizon::horizon_misc::load_file(argv[1]);
     if (!file)
     {
         // error message is already printed and memory is freed
         return EXIT_FAILURE;
     }
 
-    horizon::horizon_lexer::lexer *lexer = new horizon::horizon_lexer::lexer(file);
-    horizon::horizon_misc::misc::exit_heap_fail(lexer, "horizon::horizon_lexer");
+    horizon::horizon_deps::sptr<horizon::horizon_lexer::lexer> lexer(file.raw());
     if (!lexer->init_lexing())
     {
-        delete lexer;
-        delete file;
         return EXIT_FAILURE;
     }
 
-    horizon::horizon_parser::parser *parser = new horizon::horizon_parser::parser(std::move(lexer->move()), file);
-    horizon::horizon_misc::misc::exit_heap_fail(parser, "horizon::horizon_parser");
-    delete lexer;
+    horizon::horizon_deps::sptr<horizon::horizon_parser::parser> parser({std::move(lexer->move()), file.raw()});
 
     if (!parser->init_parsing())
     {
-        delete parser;
-        delete file;
         return EXIT_FAILURE;
     }
-
-    delete parser;
-    delete file;
 
     return EXIT_SUCCESS;
 }
