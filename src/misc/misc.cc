@@ -6,6 +6,7 @@
 
 #include "./load_file.hh"
 #include "./exit_heap_fail.hh"
+#include "./is_directory.hh"
 
 namespace horizon
 {
@@ -15,7 +16,18 @@ namespace horizon
         {
             if (!loc)
             {
-                std::fprintf(stderr, "error: horizon::horizon_misc::load_file: file location was (null)\n");
+                if (COLOR_ERR)
+                    std::fprintf(stderr, "horizon: " ENCLOSE(RED_FG, "error:") " horizon::horizon_misc::load_file: file location was (null)\n");
+                else
+                    std::fprintf(stderr, "horizon: error: horizon::horizon_misc::load_file: file location was (null)\n");
+                return nullptr;
+            }
+            if (is_directory(loc))
+            {
+                if (COLOR_ERR)
+                    std::fprintf(stderr, "horizon: " ENCLOSE(RED_FG, "error[E1]:") " '%s' cannot be opened for reading: Is a directory\n", loc);
+                else
+                    std::fprintf(stderr, "horizon: error[E1]: '%s' cannot be opened for reading: Is a directory\n", loc);
                 return nullptr;
             }
             HR_FILE *file = new HR_FILE();
@@ -62,6 +74,26 @@ namespace horizon
                     std::fprintf(stderr, "horizon: error: %s: cannot allocate memory on heap.\n", __s);
                 std::exit(EXIT_FAILURE);
             }
+        }
+
+        bool is_directory(const char *loc)
+        {
+            if (!loc)
+                return false;
+#if defined _WIN32 || defined _WIN64 || defined __CYGWIN__
+            DWORD fileAttributes = GetFileAttributesA(loc);
+            if (fileAttributes == INVALID_FILE_ATTRIBUTES)
+                return false;
+            else if (fileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+                return true;
+            else
+                return false;
+#else
+            struct stat buffer;
+            if (stat(loc, &buffer) == 0 && S_ISDIR(buffer.st_mode))
+                return true;
+#endif
+            return false;
         }
     }
 }
