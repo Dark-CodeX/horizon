@@ -4,8 +4,8 @@
  * @author Tushar Chaurasia (Dark-CodeX)
  */
 
-#ifndef HORIZON_MISC_MISC_HH
-#define HORIZON_MISC_MISC_HH
+#ifndef HORIZON_MISC_LOAD_FILE_HH
+#define HORIZON_MISC_LOAD_FILE_HH
 
 #include <cstdio>
 #include <cerrno>
