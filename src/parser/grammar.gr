@@ -39,13 +39,21 @@
 
 <function_declaration>                  ::=     "func" <identifier> "(" <parameter_list> ")" ":" <type_specifier> "{" <statement_list> "}"
 
+<template_function_declaration>         ::=     "func" <identifier> "<" <template_parameter_list> ">" "(" <parameter_list> ")" ":" <type_specifier> "{" <statement_list> "}"
+
 <parameter_list>                        ::=     <parameter> "," <parameter_list>
                                                 | <parameter>
                                                 | ε
 
+<template_parameter_list>               ::=     <template_parameter> "," <template_parameter_list>
+                                                | <template_parameter>
+
 <parameter>                             ::=     <type_specifier> ":" <identifier>
 
-<type_specifier>                        ::=     "char",
+<template_parameter>                    ::=     <type_specifier> ":" <identifier>
+                                                | <type_specifier>
+
+<type_specifier>                        ::=     "char"
                                                 | "uchar"
                                                 | "u8char"
                                                 | "u16char"
