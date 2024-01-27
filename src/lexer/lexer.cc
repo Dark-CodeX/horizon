@@ -239,7 +239,7 @@ namespace horizon
                 case '\r':
                 case '\t':
                 case ' ':
-                    this->pre_advance_lexer();
+                    this->pre_advance_lexer(); // here space, newline, tab and carriage is ignored
                     break;
 
                 case '(':
