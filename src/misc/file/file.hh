@@ -4,8 +4,8 @@
  * @author Tushar Chaurasia (Dark-CodeX)
  */
 
-#ifndef HORIZON_MISC_FILE_HH
-#define HORIZON_MISC_FILE_HH
+#ifndef HORIZON_MISC_FILE_FILE_HH
+#define HORIZON_MISC_FILE_FILE_HH
 
 #include "../../../deps/string/string.hh"
 
