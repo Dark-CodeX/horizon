@@ -25,7 +25,7 @@ namespace horizon
          *      2. Make only those functions which are really needed in the program
          *      3. If any function is missing and is really needed, make it yourself
          *      4. Main priority of this class is ONLY performance and efficiency both instruction and memory wise
-         *      5. NO function should create my memory error or leaks
+         *      5. NO function should create any memory error or leaks
          */
         template <typename T>
         class vector

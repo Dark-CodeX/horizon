@@ -29,7 +29,7 @@ namespace horizon
          *      3. USE `calloc` and `realloc` only
          *      4. If any function is missing and is really needed, make it yourself
          *      5. Main priority of this class is ONLY performance and efficiency both instruction and memory wise
-         *      6. NO function should create my memory error or leaks
+         *      6. NO function should create any memory error or leaks
          */
         class string
         {
