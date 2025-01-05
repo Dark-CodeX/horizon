@@ -30,15 +30,15 @@ namespace horizon
         template <typename T>
         class vector
         {
-        private:
+          private:
             T *data;
             std::size_t len, cap;
 
-        private:
+          private:
             void init_vector(const std::size_t &N);
             void resize_vector();
 
-        public:
+          public:
             vector();
             vector(T *ptr_begin, T *ptr_end);
             vector(const vector &vec);
@@ -51,6 +51,7 @@ namespace horizon
             vector &add(const T &item);
             vector &add(T &&item);
             vector &remove();
+            vector &remove(const std::size_t &nth);
             [[nodiscard]] bool is_empty() const;
             [[nodiscard]] bool is_null() const;
             vector &erase();
@@ -201,6 +202,27 @@ namespace horizon
             if (!this->data || this->len == 0)
                 return *this;
             this->data[--this->len].~T();
+            return *this;
+        }
+
+        template <typename T>
+        vector<T> &vector<T>::remove(const std::size_t &nth)
+        {
+            if (!this->data || this->len == 0)
+                return *this;
+            if (nth >= this->len)
+            {
+                if (COLOR_ERR)
+                    std::fprintf(stderr, "horizon: " ENCLOSE(RED_FG, "error:") " " ENCLOSE(WHITE_FG, "horizon::horizon_deps::vector:") " invalid memory access in %p for %zu, max was %zu\n", static_cast<void *>(this->data), nth, this->len);
+                else
+                    std::fprintf(stderr, "horizon: error: horizon::horizon_deps::vector: invalid memory access in %p for %zu, max was %zu\n", static_cast<void *>(this->data), nth, this->len);
+                std::exit(EXIT_FAILURE);
+            }
+            for (std::size_t i = nth; i < this->len - 1; i++)
+            {
+                this->data[i] = std::move(this->data[i + 1]);
+            }
+            this->len--;
             return *this;
         }
 
