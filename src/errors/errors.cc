@@ -49,9 +49,9 @@ namespace horizon
         {
             std::pair<horizon_deps::string, std::size_t> data = errors::getline(file->M_content, start, end, RED_FG);
             if (COLOR_ERR)
-                std::fprintf(stderr, "horizon: lexer: " ENCLOSE(WHITE_FG, "%s:%zu:%zu:") " " ENCLOSE(RED_FG, "error[E%u]:") " ", file->M_location.c_str(), line_no, data.second + 1, code);
+                std::fprintf(stderr, "horizon: lexer: " ENCLOSE(WHITE_FG, "%s:%zu:%zu:") " " ENCLOSE(RED_FG, "error[E%u]:") " ", file->M_location.c_str(), line_no, data.second + 1, (unsigned)code);
             else
-                std::fprintf(stderr, "horizon: lexer: %s:%zu:%zu: error[E%u]: ", file->M_location.c_str(), line_no, data.second + 1, code);
+                std::fprintf(stderr, "horizon: lexer: %s:%zu:%zu: error[E%u]: ", file->M_location.c_str(), line_no, data.second + 1, (unsigned)code);
 
             for (std::size_t i = 0; i < err_msg.length(); i++)
                 std::fprintf(stderr, "%s%s", err_msg[i].c_str(), (i < err_msg.length() - 1 ? " " : "\n"));
@@ -70,9 +70,9 @@ namespace horizon
             std::size_t line_no = errors::getline_no(file->M_content, tok.M_start);
 
             if (COLOR_ERR)
-                std::fprintf(stderr, "horizon: parser: " ENCLOSE(WHITE_FG, "%s:%zu:%zu:") " " ENCLOSE(RED_FG, "error[E%u]:") " ", file->M_location.c_str(), line_no, data.second + 1, code);
+                std::fprintf(stderr, "horizon: parser: " ENCLOSE(WHITE_FG, "%s:%zu:%zu:") " " ENCLOSE(RED_FG, "error[E%u]:") " ", file->M_location.c_str(), line_no, data.second + 1, (unsigned)code);
             else
-                std::fprintf(stderr, "horizon: parser: %s:%zu:%zu: error[E%u]: ", file->M_location.c_str(), line_no, data.second + 1, code);
+                std::fprintf(stderr, "horizon: parser: %s:%zu:%zu: error[E%u]: ", file->M_location.c_str(), line_no, data.second + 1, (unsigned)code);
 
             for (std::size_t i = 0; i < err_msg.length(); i++)
                 std::fprintf(stderr, "%s%s", err_msg[i].c_str(), (i < err_msg.length() - 1 ? " " : "\n"));
