@@ -64,7 +64,15 @@ namespace horizon
                     else if (this->M_ch == '*')
                     {
                         this->pre_advance_lexer();
-                        this->append_token(token_type::TOKEN_ARITHMETIC_POWER);
+                        if (this->M_ch == '=')
+                        {
+                            this->pre_advance_lexer();
+                            this->append_token(token_type::TOKEN_ASSIGN_POWER);
+                        }
+                        else
+                        {
+                            this->append_token(token_type::TOKEN_ARITHMETIC_POWER);
+                        }
                     }
                     else
                     {
@@ -778,6 +786,7 @@ namespace horizon
                     "TOKEN_ASSIGN_ADD",
                     "TOKEN_ASSIGN_SUBSTRACT",
                     "TOKEN_ASSIGN_MULTIPLY",
+                    "TOKEN_ASSIGN_POWER",
                     "TOKEN_ASSIGN_DIVIDE",
                     "TOKEN_ASSIGN_MODULUS",
                     "TOKEN_ASSIGN_BITWISE_AND",
