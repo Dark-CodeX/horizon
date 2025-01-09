@@ -35,7 +35,7 @@ depends('./src/misc/exit_heap_fail.hh')
 depends('./src/misc/load_file.hh')
 depends('./src/misc/misc.cc')
 
-depends('./src/parser/function_declaration/function_declaration.hh')
+depends('./src/parser/ast/ast.hh')
 depends('./src/parser/grammar.gr')
 depends('./src/parser/parser.cc')
 depends('./src/parser/parser.hh')
