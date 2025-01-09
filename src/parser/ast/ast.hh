@@ -10,8 +10,10 @@
 #include <iostream>
 
 #include "../../../deps/sptr/sptr.hh"
-#include "../../token_type/token_type.hh"
 #include "../../../deps/string/string.hh"
+#include "../../token_type/token_type.hh"
+#include "../../../deps/vector/vector.hh"
+#include "../../../deps/pair/pair.hh"
 
 namespace horizon
 {
@@ -114,6 +116,28 @@ namespace horizon
                 std::cout << " " << to_str[(unsigned)this->M_operator] << " ";
                 this->M_right->print();
                 printf(" )");
+            }
+        };
+
+        class ast_variable_declaration : public ast_node
+        {
+            horizon_deps::string M_type;
+            horizon_deps::vector<horizon_deps::pair<horizon_deps::string, horizon_deps::sptr<ast_node>>> M_variables;
+
+          public:
+            inline ast_variable_declaration(horizon_deps::string &&type, horizon_deps::vector<horizon_deps::pair<horizon_deps::string, horizon_deps::sptr<ast_node>>> &&vars)
+                : M_type(std::move(type)), M_variables(std::move(vars)) {}
+
+            inline void print() const override
+            {
+                std::cout << "TYPE: " << M_type.c_str() << "(\n";
+                for (const horizon_deps::pair<horizon_deps::string, horizon_deps::sptr<ast_node>> &i : this->M_variables)
+                {
+                    std::cout << "\tNAME: " << i.get_first().c_str() << "    VALUE: ";
+                    i.get_second()->print();
+                    std::cout << "\n";
+                }
+                std::cout << ")\n";
             }
         };
     }
