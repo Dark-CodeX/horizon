@@ -41,6 +41,7 @@ namespace horizon
           public:
             vector();
             vector(T *ptr_begin, T *ptr_end);
+            vector(T *ptr, const std::size_t &__len);
             vector(const vector &vec);
             vector(vector &&other) noexcept(true);
             vector(const std::initializer_list<T> &__list);
@@ -102,6 +103,22 @@ namespace horizon
                 this->init_vector(16);
                 for (const T *i = ptr_begin; i != ptr_end; i++)
                     this->add(*i);
+            }
+            else
+            {
+                this->len = 0;
+                this->cap = 0;
+                this->data = nullptr;
+            }
+        }
+
+        template <typename T>
+        vector<T>::vector(T *ptr, const std::size_t &__len)
+        {
+            if (ptr)
+            {
+                this->data = ptr;
+                this->cap = this->len = __len;
             }
             else
             {
