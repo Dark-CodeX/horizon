@@ -32,7 +32,19 @@ namespace horizon
 
         horizon_deps::sptr<ast_node> parser::parse_operators()
         {
-            return this->parse_assignment_operator();
+            return this->parse_comma();
+        }
+
+        horizon_deps::sptr<ast_node> parser::parse_comma()
+        {
+            horizon_deps::sptr<ast_node> left = this->parse_assignment_operator();
+            while (this->get_token().M_type == token_type::TOKEN_COMMA)
+            {
+                const token &operator_token = this->post_advance();
+                horizon_deps::sptr<ast_node> right = this->parse_assignment_operator();
+                left = new ast_binary_operation_node(std::move(left), operator_token.M_type, std::move(right));
+            }
+            return left;
         }
 
         horizon_deps::sptr<ast_node> parser::parse_assignment_operator()
