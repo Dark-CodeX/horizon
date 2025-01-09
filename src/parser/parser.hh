@@ -12,9 +12,9 @@
 #include "../token_type/token_type.hh"
 #include "../token/token.hh"
 #include "../defines/keywords_primary_data_types.h"
-#include "./function_declaration/function_declaration.hh"
 #include "../errors/errors.hh"
 #include "../misc/file/file.hh"
+#include "./ast/ast.hh"
 
 namespace horizon
 {
@@ -22,24 +22,37 @@ namespace horizon
     {
         class parser
         {
-        private:
+          private:
             horizon_deps::vector<token> M_tokens;
             horizon_misc::HR_FILE *M_file;
+            horizon_deps::sptr<ast_node> M_ast;
 
             std::size_t M_current_parser;
 
-        private:
+          private:
             [[nodiscard]] bool has_reached_end() const;
+            [[nodiscard]] const token &pre_advance();
+            [[nodiscard]] const token &post_advance();
+            [[nodiscard]] const token &get_token() const;
 
-            [[nodiscard]] bool parse_function();
+            [[nodiscard]] horizon_deps::sptr<ast_node> parse_operators();
+            [[nodiscard]] horizon_deps::sptr<ast_node> parse_assignment_operator();
+            [[nodiscard]] horizon_deps::sptr<ast_node> parse_logical_or();
+            [[nodiscard]] horizon_deps::sptr<ast_node> parse_logical_and();
+            [[nodiscard]] horizon_deps::sptr<ast_node> parse_bitwise_or();
+            [[nodiscard]] horizon_deps::sptr<ast_node> parse_bitwise_xor();
+            [[nodiscard]] horizon_deps::sptr<ast_node> parse_bitwise_and();
+            [[nodiscard]] horizon_deps::sptr<ast_node> parse_equality_operator();
+            [[nodiscard]] horizon_deps::sptr<ast_node> parse_relational_operator();
+            [[nodiscard]] horizon_deps::sptr<ast_node> parse_bitwise_shift();
+            [[nodiscard]] horizon_deps::sptr<ast_node> parse_expr();
+            [[nodiscard]] horizon_deps::sptr<ast_node> parse_term();
+            [[nodiscard]] horizon_deps::sptr<ast_node> parse_exponent();
+            [[nodiscard]] horizon_deps::sptr<ast_node> parse_factor();
 
-            [[nodiscard]] bool read_tokens();
-
-        public: // non-static public functions
-            parser(horizon_deps::vector<token> &&movable_vec, horizon_misc::HR_FILE *file);
+          public: // non-static public functions
+            parser(horizon_deps::vector<token> &&movable_tokens, horizon_misc::HR_FILE *file);
             [[nodiscard]] bool init_parsing();
-
-            void debug_print() const;
         };
     }
 }
