@@ -662,7 +662,7 @@ namespace horizon
                 if (this->M_tokens[i].M_type == token_type::TOKEN_ARITHMETIC_SUBSTRACT)
                 {
                     bool merge_token = true;
-                    if (i != 0 && (this->M_tokens[i - 1].M_type == token_type::TOKEN_INTEGER_LITERAL || this->M_tokens[i - 1].M_type == token_type::TOKEN_DECIMAL_LITERAL))
+                    if (i != 0 && (this->M_tokens[i - 1].M_type == token_type::TOKEN_INTEGER_LITERAL || this->M_tokens[i - 1].M_type == token_type::TOKEN_DECIMAL_LITERAL || this->M_tokens[i - 1].M_type == token_type::TOKEN_IDENTIFIER))
                         merge_token = false;
                     if (merge_token)
                     {
