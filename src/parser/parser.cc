@@ -30,21 +30,56 @@ namespace horizon
             return this->M_tokens[this->M_current_parser];
         }
 
-        horizon_deps::sptr<ast_node> parser::parse_operators()
+        horizon_deps::sptr<ast_node> parser::parse_variable_decl()
         {
-            return this->parse_comma();
+            if (this->get_token().M_type == token_type::TOKEN_PRIMARY_TYPE || this->get_token().M_type == token_type::TOKEN_IDENTIFIER)
+            {
+                horizon_deps::vector<horizon_deps::pair<horizon_deps::string, horizon_deps::sptr<ast_node>>> vec(5);
+                horizon_deps::string &type = this->M_tokens[this->M_current_parser++].M_lexeme;
+                if (this->get_token().M_type != token_type::TOKEN_COLON)
+                {
+                    horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"expected ':' after data type", type});
+                    return nullptr;
+                }
+                this->post_advance();
+                while (this->get_token().M_type != token_type::TOKEN_SEMICOLON && !this->has_reached_end())
+                {
+                    horizon_deps::pair<horizon_deps::string, horizon_deps::sptr<ast_node>> pair;
+                    if (this->get_token().M_type == token_type::TOKEN_PRIMARY_TYPE || this->get_token().M_type == token_type::TOKEN_KEYWORD)
+                    {
+                        horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"reserved word cannot be used as an identifier, but got", this->get_token().M_lexeme});
+                        return nullptr;
+                    }
+                    else if (this->get_token().M_type == token_type::TOKEN_IDENTIFIER)
+                        pair.raw_first() = new horizon_deps::string(this->get_token().M_lexeme);
+                    else
+                    {
+                        horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"expected an identifier, but got", this->get_token().M_lexeme});
+                        return nullptr;
+                    }
+                    this->post_advance();
+                    if (this->get_token().M_type == token_type::TOKEN_ASSIGN)
+                    {
+                        this->post_advance();
+                        pair.raw_second() = new horizon_deps::sptr<ast_node>(this->parse_operators());
+                        if (this->get_token().M_type == token_type::TOKEN_COMMA)
+                            this->post_advance();
+                    }
+                    else if (this->get_token().M_type == token_type::TOKEN_COMMA)
+                    {
+                        this->post_advance();
+                        pair.get_second() = nullptr;
+                    }
+                    vec.add(std::move(pair));
+                }
+                return new ast_variable_declaration(std::move(type), std::move(vec));
+            }
+            return nullptr;
         }
 
-        horizon_deps::sptr<ast_node> parser::parse_comma()
+        horizon_deps::sptr<ast_node> parser::parse_operators()
         {
-            horizon_deps::sptr<ast_node> left = this->parse_assignment_operator();
-            while (this->get_token().M_type == token_type::TOKEN_COMMA)
-            {
-                const token &operator_token = this->post_advance();
-                horizon_deps::sptr<ast_node> right = this->parse_assignment_operator();
-                left = new ast_binary_operation_node(std::move(left), operator_token.M_type, std::move(right));
-            }
-            return left;
+            return this->parse_assignment_operator();
         }
 
         horizon_deps::sptr<ast_node> parser::parse_assignment_operator()
@@ -243,7 +278,7 @@ namespace horizon
         {
             while (!this->has_reached_end())
             {
-                this->M_ast = this->parse_operators();
+                this->M_ast = this->parse_variable_decl();
                 if (!this->M_ast)
                     return false;
                 this->M_ast->print();
