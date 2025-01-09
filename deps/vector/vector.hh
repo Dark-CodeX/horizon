@@ -59,6 +59,10 @@ namespace horizon
             vector &shrink_to_fit();
             [[nodiscard]] const T *raw() const;
             [[nodiscard]] T *&raw();
+            [[nodiscard]] const T *begin() const;
+            [[nodiscard]] T *&begin();
+            [[nodiscard]] const T *end() const;
+            [[nodiscard]] T *&end();
             [[nodiscard]] const T &operator[](const std::size_t &nth) const;
             [[nodiscard]] T &operator[](const std::size_t &nth);
             vector &operator=(const vector &vec);
@@ -291,6 +295,30 @@ namespace horizon
         T *&vector<T>::raw()
         {
             return this->data;
+        }
+
+        template <typename T>
+        const T *vector<T>::begin() const
+        {
+            return this->data;
+        }
+
+        template <typename T>
+        T *&vector<T>::begin()
+        {
+            return this->data;
+        }
+
+        template <typename T>
+        const T *vector<T>::end() const
+        {
+            return this->data + this->len;
+        }
+
+        template <typename T>
+        T *&vector<T>::end()
+        {
+            return this->data + this->len;
         }
 
         template <typename T>
