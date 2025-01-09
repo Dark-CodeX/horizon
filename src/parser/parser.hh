@@ -36,6 +36,7 @@ namespace horizon
             [[nodiscard]] const token &get_token() const;
 
             [[nodiscard]] horizon_deps::sptr<ast_node> parse_operators();
+            [[nodiscard]] horizon_deps::sptr<ast_node> parse_comma();
             [[nodiscard]] horizon_deps::sptr<ast_node> parse_assignment_operator();
             [[nodiscard]] horizon_deps::sptr<ast_node> parse_logical_or();
             [[nodiscard]] horizon_deps::sptr<ast_node> parse_logical_and();
