@@ -15,135 +15,230 @@ namespace horizon
             return this->M_current_parser >= this->M_tokens.length();
         }
 
-        bool parser::parse_function()
+        const token &parser::pre_advance()
         {
-            this->M_current_parser++;
-            function_declaration fd;
-            if (this->M_tokens[this->M_current_parser].M_type != token_type::TOKEN_IDENTIFIER)
-            {
-                horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->M_tokens[this->M_current_parser], {"expected an identifier, but got", this->M_tokens[this->M_current_parser].M_lexeme});
-                return false;
-            }
-            fd.M_identifier = this->M_tokens[this->M_current_parser++].M_lexeme;
-            if (this->M_tokens[this->M_current_parser].M_type != token_type::TOKEN_LEFT_PAREN)
-            {
-                horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->M_tokens[this->M_current_parser], {"expected '(', but got", this->M_tokens[this->M_current_parser].M_lexeme});
-                return false;
-            }
-            this->M_current_parser++;
-            while (this->M_tokens[this->M_current_parser].M_type != token_type::TOKEN_RIGHT_PAREN && !this->has_reached_end())
-            {
-                horizon_deps::vector<horizon_deps::string> temp_type_vec(10);
-                while (this->M_tokens[this->M_current_parser].M_type != token_type::TOKEN_COLON && !this->has_reached_end())
-                {
-                    if (this->M_tokens[this->M_current_parser].M_type != token_type::TOKEN_IDENTIFIER && this->M_tokens[this->M_current_parser].M_type != token_type::TOKEN_PRIMARY_TYPE)
-                    {
-                        horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->M_tokens[this->M_current_parser], {"expected an identifier, but got", this->M_tokens[this->M_current_parser].M_lexeme});
-                        return false;
-                    }
-                    temp_type_vec.add(this->M_tokens[this->M_current_parser++].M_lexeme);
-                }
-                if (this->M_tokens[this->M_current_parser].M_type != token_type::TOKEN_COLON)
-                {
-                    horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->M_tokens[this->M_current_parser], {"expected ':', but got", this->M_tokens[this->M_current_parser].M_lexeme});
-                    return false;
-                }
-                this->M_current_parser++;
-                if (this->M_tokens[this->M_current_parser].M_type != token_type::TOKEN_IDENTIFIER)
-                {
-                    horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->M_tokens[this->M_current_parser], {"expected an identifier, but got", this->M_tokens[this->M_current_parser].M_lexeme});
-                    return false;
-                }
-                const std::pair<std::map<horizon_deps::string, horizon_deps::vector<horizon_deps::string>>::iterator, bool> &iter = fd.M_parameter.M_container.insert({this->M_tokens[this->M_current_parser].M_lexeme, std::move(temp_type_vec)});
-                if (!iter.second)
-                {
-                    horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->M_tokens[this->M_current_parser], {this->M_tokens[this->M_current_parser].M_lexeme, "is already defined"});
-                    return false;
-                }
-                this->M_current_parser++;
-                if (this->M_tokens[this->M_current_parser].M_type == token_type::TOKEN_COMMA)
-                    this->M_current_parser++;
-            }
+            return this->M_tokens[++this->M_current_parser];
+        }
 
-            if (fd.M_parameter.M_container.empty())
-            {
-                fd.M_parameter.M_container[nullptr] = {"void"};
-            }
+        const token &parser::post_advance()
+        {
+            return this->M_tokens[this->M_current_parser++];
+        }
 
-            if (this->M_tokens[++this->M_current_parser].M_type == token_type::TOKEN_COLON)
+        const token &parser::get_token() const
+        {
+            return this->M_tokens[this->M_current_parser];
+        }
+
+        horizon_deps::sptr<ast_node> parser::parse_operators()
+        {
+            return this->parse_assignment_operator();
+        }
+
+        horizon_deps::sptr<ast_node> parser::parse_assignment_operator()
+        {
+            horizon_deps::sptr<ast_node> left = this->parse_logical_or();
+            while (this->get_token().M_type == token_type::TOKEN_ASSIGN ||
+                   this->get_token().M_type == token_type::TOKEN_ASSIGN_ADD ||
+                   this->get_token().M_type == token_type::TOKEN_ASSIGN_SUBSTRACT ||
+                   this->get_token().M_type == token_type::TOKEN_ASSIGN_MULTIPLY ||
+                   this->get_token().M_type == token_type::TOKEN_ASSIGN_POWER ||
+                   this->get_token().M_type == token_type::TOKEN_ASSIGN_DIVIDE ||
+                   this->get_token().M_type == token_type::TOKEN_ASSIGN_MODULUS ||
+                   this->get_token().M_type == token_type::TOKEN_ASSIGN_BITWISE_AND ||
+                   this->get_token().M_type == token_type::TOKEN_ASSIGN_BITWISE_OR ||
+                   this->get_token().M_type == token_type::TOKEN_ASSIGN_BITWISE_XOR ||
+                   this->get_token().M_type == token_type::TOKEN_ASSIGN_LEFT_SHIFT ||
+                   this->get_token().M_type == token_type::TOKEN_ASSIGN_RIGHT_SHIFT)
             {
-                this->M_current_parser++;
-                horizon_deps::vector<horizon_deps::string> temp_ret_vec(10);
-                while (this->M_tokens[this->M_current_parser].M_type != token_type::TOKEN_LEFT_BRACE && !this->has_reached_end())
-                {
-                    if (this->M_tokens[this->M_current_parser].M_type != token_type::TOKEN_IDENTIFIER && this->M_tokens[this->M_current_parser].M_type != token_type::TOKEN_PRIMARY_TYPE)
-                    {
-                        horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->M_tokens[this->M_current_parser], {"expected an identifier, but got", this->M_tokens[this->M_current_parser].M_lexeme});
-                        return false;
-                    }
-                    temp_ret_vec.add(this->M_tokens[this->M_current_parser++].M_lexeme);
-                }
-                fd.M_return_type = std::move(temp_ret_vec);
+                const token &operator_token = this->post_advance();
+                horizon_deps::sptr<ast_node> right = this->parse_logical_or();
+                left = new ast_binary_operation_node(std::move(left), operator_token.M_type, std::move(right));
+            }
+            return left;
+        }
+
+        horizon_deps::sptr<ast_node> parser::parse_logical_or()
+        {
+            horizon_deps::sptr<ast_node> left = this->parse_logical_and();
+            while (this->get_token().M_type == token_type::TOKEN_LOGICAL_OR)
+            {
+                const token &operator_token = this->post_advance();
+                horizon_deps::sptr<ast_node> right = this->parse_logical_and();
+                left = new ast_binary_operation_node(std::move(left), operator_token.M_type, std::move(right));
+            }
+            return left;
+        }
+
+        horizon_deps::sptr<ast_node> parser::parse_logical_and()
+        {
+            horizon_deps::sptr<ast_node> left = this->parse_bitwise_or();
+            while (this->get_token().M_type == token_type::TOKEN_LOGICAL_AND)
+            {
+                const token &operator_token = this->post_advance();
+                horizon_deps::sptr<ast_node> right = this->parse_bitwise_or();
+                left = new ast_binary_operation_node(std::move(left), operator_token.M_type, std::move(right));
+            }
+            return left;
+        }
+
+        horizon_deps::sptr<ast_node> parser::parse_bitwise_or()
+        {
+            horizon_deps::sptr<ast_node> left = this->parse_bitwise_xor();
+            while (this->get_token().M_type == token_type::TOKEN_BITWISE_OR)
+            {
+                const token &operator_token = this->post_advance();
+                horizon_deps::sptr<ast_node> right = this->parse_bitwise_xor();
+                left = new ast_binary_operation_node(std::move(left), operator_token.M_type, std::move(right));
+            }
+            return left;
+        }
+
+        horizon_deps::sptr<ast_node> parser::parse_bitwise_xor()
+        {
+            horizon_deps::sptr<ast_node> left = this->parse_bitwise_and();
+            while (this->get_token().M_type == token_type::TOKEN_BITWISE_XOR)
+            {
+                const token &operator_token = this->post_advance();
+                horizon_deps::sptr<ast_node> right = this->parse_bitwise_and();
+                left = new ast_binary_operation_node(std::move(left), operator_token.M_type, std::move(right));
+            }
+            return left;
+        }
+
+        horizon_deps::sptr<ast_node> parser::parse_bitwise_and()
+        {
+            horizon_deps::sptr<ast_node> left = this->parse_equality_operator();
+            while (this->get_token().M_type == token_type::TOKEN_BITWISE_AND)
+            {
+                const token &operator_token = this->post_advance();
+                horizon_deps::sptr<ast_node> right = this->parse_equality_operator();
+                left = new ast_binary_operation_node(std::move(left), operator_token.M_type, std::move(right));
+            }
+            return left;
+        }
+
+        horizon_deps::sptr<ast_node> parser::parse_equality_operator()
+        {
+            horizon_deps::sptr<ast_node> left = this->parse_relational_operator();
+            while (this->get_token().M_type == token_type::TOKEN_RELATIONAL_EQUAL_TO ||
+                   this->get_token().M_type == token_type::TOKEN_RELATIONAL_NOT_EQUAL_TO)
+            {
+                const token &operator_token = this->post_advance();
+                horizon_deps::sptr<ast_node> right = this->parse_relational_operator();
+                left = new ast_binary_operation_node(std::move(left), operator_token.M_type, std::move(right));
+            }
+            return left;
+        }
+
+        horizon_deps::sptr<ast_node> parser::parse_relational_operator()
+        {
+            horizon_deps::sptr<ast_node> left = this->parse_bitwise_shift();
+            while (this->get_token().M_type == token_type::TOKEN_RELATIONAL_GREATER_THAN ||
+                   this->get_token().M_type == token_type::TOKEN_RELATIONAL_LESS_THAN ||
+                   this->get_token().M_type == token_type::TOKEN_RELATIONAL_GREATER_THAN_OR_EQUAL_TO ||
+                   this->get_token().M_type == token_type::TOKEN_RELATIONAL_LESS_THAN_OR_EQUAL_TO)
+            {
+                const token &operator_token = this->post_advance();
+                horizon_deps::sptr<ast_node> right = this->parse_bitwise_shift();
+                left = new ast_binary_operation_node(std::move(left), operator_token.M_type, std::move(right));
+            }
+            return left;
+        }
+
+        horizon_deps::sptr<ast_node> parser::parse_bitwise_shift()
+        {
+            horizon_deps::sptr<ast_node> left = this->parse_expr();
+            while (this->get_token().M_type == token_type::TOKEN_BITWISE_LEFT_SHIFT ||
+                   this->get_token().M_type == token_type::TOKEN_BITWISE_RIGHT_SHIFT)
+            {
+                const token &operator_token = this->post_advance();
+                horizon_deps::sptr<ast_node> right = this->parse_expr();
+                left = new ast_binary_operation_node(std::move(left), operator_token.M_type, std::move(right));
+            }
+            return left;
+        }
+
+        horizon_deps::sptr<ast_node> parser::parse_expr()
+        {
+            horizon_deps::sptr<ast_node> left = this->parse_term();
+            while (this->get_token().M_type == token_type::TOKEN_ARITHMETIC_ADD ||
+                   this->get_token().M_type == token_type::TOKEN_ARITHMETIC_SUBSTRACT)
+            {
+                const token &operator_token = this->post_advance();
+                horizon_deps::sptr<ast_node> right = this->parse_term();
+                left = new ast_binary_operation_node(std::move(left), operator_token.M_type, std::move(right));
+            }
+            return left;
+        }
+
+        horizon_deps::sptr<ast_node> parser::parse_term()
+        {
+            horizon_deps::sptr<ast_node> left = this->parse_exponent();
+            while (this->get_token().M_type == token_type::TOKEN_ARITHMETIC_MULTIPLY ||
+                   this->get_token().M_type == token_type::TOKEN_ARITHMETIC_DIVIDE ||
+                   this->get_token().M_type == token_type::TOKEN_ARITHMETIC_MODULUS)
+            {
+                const token &operator_token = this->post_advance();
+                horizon_deps::sptr<ast_node> right = this->parse_exponent();
+                left = new ast_binary_operation_node(std::move(left), operator_token.M_type, std::move(right));
+            }
+            return left;
+        }
+
+        horizon_deps::sptr<ast_node> parser::parse_exponent()
+        {
+            horizon_deps::sptr<ast_node> left = this->parse_factor();
+            while (this->get_token().M_type == token_type::TOKEN_ARITHMETIC_POWER)
+            {
+                const token &operator_token = this->post_advance();
+                horizon_deps::sptr<ast_node> right = this->parse_factor();
+                left = new ast_binary_operation_node(std::move(left), operator_token.M_type, std::move(right));
+            }
+            return left;
+        }
+
+        horizon_deps::sptr<ast_node> parser::parse_factor()
+        {
+            if (this->get_token().M_type == token_type::TOKEN_DECIMAL_LITERAL)
+            {
+                return new ast_operand_node(std::strtold(this->post_advance().M_lexeme.c_str(), NULL));
+            }
+            else if (this->get_token().M_type == token_type::TOKEN_INTEGER_LITERAL)
+            {
+                return new ast_operand_node(std::strtoll(this->post_advance().M_lexeme.c_str(), NULL, 10));
+            }
+            else if (this->get_token().M_type == token_type::TOKEN_IDENTIFIER)
+            {
+                return new ast_operand_node(this->post_advance().M_lexeme);
             }
             else
             {
-                fd.M_return_type = {"ctor"};
+                horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"unexpected token", this->get_token().M_lexeme});
+                return nullptr;
             }
-
-            {
-                std::printf("NAME: '%s'  RETURN: ", fd.M_identifier.c_str());
-                for (std::size_t i = 0; i < fd.M_return_type.length(); i++)
-                {
-                    std::printf("'%s' ", fd.M_return_type[i].c_str());
-                }
-                std::printf("PARAMETER: ");
-                for (const auto &i : fd.M_parameter.M_container)
-                {
-                    std::printf("'%s' ", i.first.c_str());
-                    for (std::size_t j = 0; j < i.second.length(); j++)
-                    {
-                        std::printf("'%s' ", i.second[j].c_str());
-                    }
-                }
-                std::printf("\n");
-            }
-
-            return true;
         }
 
-        bool parser::read_tokens()
+        parser::parser(horizon_deps::vector<token> &&movable_tokens, horizon_misc::HR_FILE *file)
         {
-            while (!this->has_reached_end())
-            {
-                const token &current_tok = this->M_tokens[this->M_current_parser];
-                if (current_tok.M_lexeme == "func")
-                {
-                    if (!this->parse_function())
-                        return false;
-                }
-                else
-                {
-                    this->M_current_parser++;
-                }
-            }
-            this->M_tokens.erase();
-            return true;
-        }
-
-        parser::parser(horizon_deps::vector<token> &&movable_vec, horizon_misc::HR_FILE *file)
-        {
-            this->M_tokens = std::move(movable_vec);
+            this->M_tokens = std::move(movable_tokens);
             this->M_file = file;
+
             this->M_current_parser = 0;
         }
 
         bool parser::init_parsing()
         {
-            return read_tokens();
-        }
-
-        void parser::debug_print() const
-        {
+            while (!this->has_reached_end())
+            {
+                this->M_ast = this->parse_operators();
+                if (!this->M_ast)
+                    return false;
+                this->M_ast->print();
+                break;
+            }
+            this->M_tokens.erase();
+            return true;
         }
     }
 }
