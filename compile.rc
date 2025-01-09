@@ -13,6 +13,7 @@ depends('./deps/string/string.cc')
 depends('./deps/string/string.hh')
 depends('./deps/vector/vector.hh')
 depends('./deps/sptr/sptr.hh')
+depends('./deps/pair/pair.hh')
 
 # SRC
 depends('./src/colorize/colorize.cc')
