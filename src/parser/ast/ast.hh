@@ -154,15 +154,14 @@ namespace horizon
             inline void print() const override
             {
                 std::cout << "CALL NAME: " << this->M_identifier.c_str() << "( ";
-                for (const horizon_deps::sptr<ast_node> &i : this->M_arguments)
+                for (std::size_t i = 0; i < this->M_arguments.length(); i++)
                 {
-                    if (i)
+                    if (this->M_arguments[i])
                     {
-                        i->print();
-                        std::cout << ",";
+                        this->M_arguments[i]->print();
+                        std::cout << (i < this->M_arguments.length() - 1 ? ", " : " )");
                     }
                 }
-                std::cout << " )";
             }
         };
     }
