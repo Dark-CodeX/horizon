@@ -37,7 +37,7 @@ namespace horizon
             inline void print() const override
             {
                 if constexpr (std::is_same<T, horizon_deps::string>::value)
-                    std::cout << this->M_val.c_str();
+                    std::cout << (this->M_val.c_str() == nullptr ? "(null)" : this->M_val.c_str());
                 else
                     std::cout << this->M_val;
             }
@@ -130,14 +130,39 @@ namespace horizon
 
             inline void print() const override
             {
-                std::cout << "TYPE: " << M_type.c_str() << "(\n";
+                std::cout << "VAR_DECL TYPE: " << M_type.c_str() << "(\n";
                 for (const horizon_deps::pair<horizon_deps::string, horizon_deps::sptr<ast_node>> &i : this->M_variables)
                 {
-                    std::cout << "\tNAME: " << i.get_first().c_str() << "    VALUE: ";
-                    i.get_second()->print();
+                    std::cout << "\tNAME: " << (i.get_first().c_str() == nullptr ? "(null)" : i.get_first().c_str()) << "    VALUE: ";
+                    if (i.raw_second())
+                        i.get_second()->print();
                     std::cout << "\n";
                 }
                 std::cout << ")\n";
+            }
+        };
+
+        class ast_function_call : public ast_node
+        {
+            horizon_deps::string M_identifier;
+            horizon_deps::vector<horizon_deps::sptr<ast_node>> M_arguments;
+
+          public:
+            inline ast_function_call(horizon_deps::string &&identifier, horizon_deps::vector<horizon_deps::sptr<ast_node>> &&args)
+                : M_identifier(std::move(identifier)), M_arguments(std::move(args)) {}
+
+            inline void print() const override
+            {
+                std::cout << "CALL NAME: " << this->M_identifier.c_str() << "( ";
+                for (const horizon_deps::sptr<ast_node> &i : this->M_arguments)
+                {
+                    if (i)
+                    {
+                        i->print();
+                        std::cout << ",";
+                    }
+                }
+                std::cout << " )";
             }
         };
     }
