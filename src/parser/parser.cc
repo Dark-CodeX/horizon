@@ -68,10 +68,16 @@ namespace horizon
                     else if (this->get_token().M_type == token_type::TOKEN_COMMA)
                     {
                         this->post_advance();
-                        pair.get_second() = nullptr;
+                        pair.raw_second() = nullptr;
                     }
                     vec.add(std::move(pair));
                 }
+                if (this->get_token().M_type != token_type::TOKEN_SEMICOLON)
+                {
+                    horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"expected ;, but got", this->get_token().M_lexeme});
+                    return nullptr;
+                }
+                vec.shrink_to_fit();
                 return new ast_variable_declaration(std::move(type), std::move(vec));
             }
             return nullptr;
@@ -235,14 +241,41 @@ namespace horizon
 
         horizon_deps::sptr<ast_node> parser::parse_exponent()
         {
-            horizon_deps::sptr<ast_node> left = this->parse_factor();
+            horizon_deps::sptr<ast_node> left = this->parse_identifier();
             while (this->get_token().M_type == token_type::TOKEN_ARITHMETIC_POWER)
             {
                 const token &operator_token = this->post_advance();
-                horizon_deps::sptr<ast_node> right = this->parse_factor();
+                horizon_deps::sptr<ast_node> right = this->parse_identifier();
                 left = new ast_binary_operation_node(std::move(left), operator_token.M_type, std::move(right));
             }
             return left;
+        }
+
+        horizon_deps::sptr<ast_node> parser::parse_identifier()
+        {
+            if (this->get_token().M_type == token_type::TOKEN_IDENTIFIER)
+            {
+                horizon_deps::string identifier = this->post_advance().M_lexeme;
+                if (this->get_token().M_type == token_type::TOKEN_LEFT_PAREN)
+                {
+                    this->post_advance();
+                    horizon_deps::vector<horizon_deps::sptr<ast_node>> vec(5);
+                    while (this->get_token().M_type != token_type::TOKEN_RIGHT_PAREN && !this->has_reached_end())
+                    {
+                        vec.add(this->parse_operators());
+                        if (this->get_token().M_type == token_type::TOKEN_COMMA)
+                            this->post_advance();
+                    }
+                    if (this->get_token().M_type == token_type::TOKEN_RIGHT_PAREN)
+                        this->post_advance();
+                    vec.shrink_to_fit();
+                    return new ast_function_call(std::move(identifier), std::move(vec));
+                }
+                else
+                    return new ast_operand_node(std::move(identifier));
+            }
+            else
+                return this->parse_factor();
         }
 
         horizon_deps::sptr<ast_node> parser::parse_factor()
@@ -255,9 +288,13 @@ namespace horizon
             {
                 return new ast_operand_node(std::strtoll(this->post_advance().M_lexeme.c_str(), NULL, 10));
             }
-            else if (this->get_token().M_type == token_type::TOKEN_IDENTIFIER)
+            else if (this->get_token().M_type == token_type::TOKEN_STRING_LITERAL)
             {
-                return new ast_operand_node(this->post_advance().M_lexeme);
+                return new ast_operand_node(this->post_advance().M_lexeme.c_str());
+            }
+            else if (this->get_token().M_type == token_type::TOKEN_CHAR_LITERAL)
+            {
+                return new ast_operand_node(*this->post_advance().M_lexeme.c_str());
             }
             else
             {
