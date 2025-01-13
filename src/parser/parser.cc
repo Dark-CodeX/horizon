@@ -275,6 +275,20 @@ namespace horizon
                     return new ast_operand_node(std::move(identifier));
             }
             else
+                return this->parse_brackets();
+        }
+
+        horizon_deps::sptr<ast_node> parser::parse_brackets()
+        {
+            if (this->get_token().M_type == token_type::TOKEN_LEFT_PAREN)
+            {
+                this->post_advance();
+                horizon_deps::sptr<ast_node> x = this->parse_operators();
+                if (this->get_token().M_type == token_type::TOKEN_RIGHT_PAREN)
+                    this->post_advance();
+                return x;
+            }
+            else
                 return this->parse_factor();
         }
 

@@ -51,6 +51,7 @@ namespace horizon
             [[nodiscard]] horizon_deps::sptr<ast_node> parse_term();
             [[nodiscard]] horizon_deps::sptr<ast_node> parse_exponent();
             [[nodiscard]] horizon_deps::sptr<ast_node> parse_identifier();
+            [[nodiscard]] horizon_deps::sptr<ast_node> parse_brackets();
             [[nodiscard]] horizon_deps::sptr<ast_node> parse_factor();
 
           public: // non-static public functions
