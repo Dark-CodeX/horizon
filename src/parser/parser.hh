@@ -32,7 +32,7 @@ namespace horizon
           private:
             [[nodiscard]] bool has_reached_end() const;
             [[nodiscard]] const token &pre_advance();
-            [[nodiscard]] const token &post_advance();
+            const token &post_advance();
             [[nodiscard]] const token &get_token() const;
 
             [[nodiscard]] horizon_deps::sptr<ast_node> parse_variable_decl();
@@ -50,6 +50,7 @@ namespace horizon
             [[nodiscard]] horizon_deps::sptr<ast_node> parse_expr();
             [[nodiscard]] horizon_deps::sptr<ast_node> parse_term();
             [[nodiscard]] horizon_deps::sptr<ast_node> parse_exponent();
+            [[nodiscard]] horizon_deps::sptr<ast_node> parse_identifier();
             [[nodiscard]] horizon_deps::sptr<ast_node> parse_factor();
 
           public: // non-static public functions
