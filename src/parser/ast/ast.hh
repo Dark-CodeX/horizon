@@ -339,6 +339,32 @@ namespace horizon
                 std::cout << ")\n";
             }
         };
+
+        class ast_while_loop : public ast_node
+        {
+            horizon_deps::sptr<ast_node> M_condition;
+            horizon_deps::sptr<ast_node> M_block;
+
+          public:
+            inline ast_while_loop(horizon_deps::sptr<ast_node> &&condition, horizon_deps::sptr<ast_node> &&block)
+                : M_condition(std::move(condition)), M_block(std::move(block)) {}
+
+            inline void print() const override
+            {
+                std::cout << ENCLOSE(RED_FG, "WHILE LOOP ") << "(\n";
+                if (this->M_condition)
+                {
+                    std::cout << ENCLOSE(RED_FG, "CONDITION") << "\n";
+                    this->M_condition->print();
+                }
+                if (this->M_block)
+                {
+                    std::cout << "\n";
+                    this->M_block->print();
+                }
+                std::cout << ")\n";
+            }
+        };
     }
 }
 
