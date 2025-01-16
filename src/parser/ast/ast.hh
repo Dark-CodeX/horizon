@@ -234,9 +234,10 @@ namespace horizon
                     if (this->M_arguments[i])
                     {
                         this->M_arguments[i]->print();
-                        std::cout << (i < this->M_arguments.length() - 1 ? ", " : " )");
+                        std::cout << (i < this->M_arguments.length() - 1 ? ", " : " ");
                     }
                 }
+                std::cout << ")";
             }
         };
 
@@ -262,6 +263,45 @@ namespace horizon
                     }
                 }
                 std::cout << "}\n";
+            }
+        };
+
+        class ast_if_elif_else : public ast_node
+        {
+            horizon_deps::pair<horizon_deps::sptr<ast_node>> M_if_condition_block;
+            horizon_deps::vector<horizon_deps::pair<horizon_deps::sptr<ast_node>>> M_elif_condition_block;
+            horizon_deps::sptr<ast_node> M_else_block;
+
+          public:
+            inline ast_if_elif_else(horizon_deps::pair<horizon_deps::sptr<ast_node>> &&if_cond_block, horizon_deps::vector<horizon_deps::pair<horizon_deps::sptr<ast_node>>> &&elif_cond_block, horizon_deps::sptr<ast_node> &&else_block)
+                : M_if_condition_block(std::move(if_cond_block)), M_elif_condition_block(std::move(elif_cond_block)), M_else_block(std::move(else_block)) {}
+
+            inline void print() const override
+            {
+                std::cout << ENCLOSE(RED_FG, "IF ");
+                if (this->M_if_condition_block)
+                {
+                    this->M_if_condition_block.get_first()->print();
+                    std::cout << " ";
+                    this->M_if_condition_block.get_second()->print();
+                }
+
+                for (std::size_t i = 0; i < this->M_elif_condition_block.length(); i++)
+                {
+                    if (this->M_elif_condition_block[i])
+                    {
+                        std::cout << ENCLOSE(RED_FG, "ELIF ");
+                        this->M_elif_condition_block[i].get_first()->print();
+                        std::cout << " ";
+                        this->M_elif_condition_block[i].get_second()->print();
+                    }
+                }
+
+                if (this->M_else_block)
+                {
+                    std::cout << ENCLOSE(RED_FG, "ELSE ");
+                    this->M_else_block->print();
+                }
             }
         };
     }
