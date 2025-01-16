@@ -8,9 +8,12 @@
 #define HORIZON_DEFINES_DEFINES_H
 
 #define RED_FG "\033[1;91m"
-#define WHITE_FG "\033[1;97m"
-#define PURPLE_FG "\033[1;95m"
+#define GREEN_FG "\033[1;92m"
 #define YELLOW_FG "\033[1;93m"
+#define BLUE_FG "\033[1;94m"
+#define PURPLE_FG "\033[1;95m"
+#define CYAN_FG "\033[1;96m"
+#define WHITE_FG "\033[1;97m"
 #define RESET_COLOR "\033[0m"
 
 #define ENCLOSE(clr, txt) \
