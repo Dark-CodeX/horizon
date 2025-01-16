@@ -35,6 +35,10 @@ namespace horizon
             const token &post_advance();
             [[nodiscard]] const token &get_token() const;
 
+            [[nodiscard]] bool handle_semicolon();
+
+            [[nodiscard]] horizon_deps::sptr<ast_node> parse_block();
+
             [[nodiscard]] horizon_deps::sptr<ast_node> parse_variable_decl();
 
             [[nodiscard]] horizon_deps::sptr<ast_node> parse_operators();
