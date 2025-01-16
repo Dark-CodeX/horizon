@@ -304,6 +304,41 @@ namespace horizon
                 }
             }
         };
+
+        class ast_for_loop : public ast_node
+        {
+            horizon_deps::sptr<ast_node> M_variable_decl;
+            horizon_deps::sptr<ast_node> M_condition;
+            horizon_deps::sptr<ast_node> M_step;
+            horizon_deps::sptr<ast_node> M_block;
+
+          public:
+            inline ast_for_loop(horizon_deps::sptr<ast_node> &&var_decl, horizon_deps::sptr<ast_node> &&condition, horizon_deps::sptr<ast_node> &&step, horizon_deps::sptr<ast_node> &&block)
+                : M_variable_decl(std::move(var_decl)), M_condition(std::move(condition)), M_step(std::move(step)), M_block(std::move(block)) {}
+
+            inline void print() const override
+            {
+                std::cout << ENCLOSE(RED_FG, "FOR LOOP ") << "(\n";
+                if (this->M_variable_decl)
+                    this->M_variable_decl->print();
+                if (this->M_condition)
+                {
+                    std::cout << ENCLOSE(RED_FG, "CONDITION") << "\n";
+                    this->M_condition->print();
+                }
+                if (this->M_step)
+                {
+                    std::cout << ENCLOSE(RED_FG, "\nSTEP") << "\n";
+                    this->M_step->print();
+                }
+                if (this->M_block)
+                {
+                    std::cout << "\n";
+                    this->M_block->print();
+                }
+                std::cout << ")\n";
+            }
+        };
     }
 }
 
