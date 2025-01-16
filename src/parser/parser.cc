@@ -44,6 +44,59 @@ namespace horizon
             }
         }
 
+        horizon_deps::sptr<ast_node> parser::parse_if_elif_else()
+        {
+            if (this->get_token().M_lexeme == "if")
+            {
+                horizon_deps::pair<horizon_deps::sptr<ast_node>> if_condition_block = {nullptr, nullptr};
+                horizon_deps::vector<horizon_deps::pair<horizon_deps::sptr<ast_node>>> elif_condition_block;
+                horizon_deps::sptr<ast_node> else_block = nullptr;
+
+                {
+                    // if block
+                    this->post_advance();
+                    if (this->get_token().M_type != token_type::TOKEN_LEFT_PAREN)
+                    {
+                        horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"expected '(' before '", this->get_token().M_lexeme, "'"});
+                        return nullptr;
+                    }
+                    if_condition_block.raw_first() = new horizon_deps::sptr<ast_node>(this->parse_operators());
+                    if_condition_block.raw_second() = new horizon_deps::sptr<ast_node>(this->parse_block());
+                }
+
+                if (this->get_token().M_lexeme == "elif")
+                {
+                    while (this->get_token().M_lexeme == "elif")
+                    {
+                        horizon_deps::pair<horizon_deps::sptr<ast_node>> temp = {nullptr, nullptr};
+                        this->post_advance();
+                        if (this->get_token().M_type != token_type::TOKEN_LEFT_PAREN)
+                        {
+                            horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"expected '(' before '", this->get_token().M_lexeme, "'"});
+                            return nullptr;
+                        }
+                        temp.raw_first() = new horizon_deps::sptr<ast_node>(this->parse_operators());
+                        temp.raw_second() = new horizon_deps::sptr<ast_node>(this->parse_block());
+                        elif_condition_block.add(std::move(temp));
+                    }
+                    elif_condition_block.shrink_to_fit();
+                }
+
+                if (this->get_token().M_lexeme == "else")
+                {
+                    this->post_advance();
+                    else_block = this->parse_block();
+                }
+
+                return new ast_if_elif_else(std::move(if_condition_block), std::move(elif_condition_block), std::move(else_block));
+            }
+            else
+            {
+                horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {horizon_deps::string("'") + this->get_token().M_lexeme + "' without a prior 'if'"});
+                return nullptr;
+            }
+        }
+
         horizon_deps::sptr<ast_node> parser::parse_block()
         {
             if (this->get_token().M_type == token_type::TOKEN_LEFT_BRACE)
@@ -53,7 +106,16 @@ namespace horizon
                 while (this->get_token().M_type != token_type::TOKEN_RIGHT_BRACE && !this->has_reached_end())
                 {
                     // here, we need to parse statements, function calls, loops, decls and exprs
-                    if (this->get_token().M_type == token_type::TOKEN_IDENTIFIER && (this->M_tokens[this->M_current_parser + 1].M_type != token_type::TOKEN_COLON || this->M_tokens[this->M_current_parser + 1].M_type == token_type::TOKEN_LEFT_PAREN))
+                    if (this->get_token().M_type == token_type::TOKEN_LEFT_BRACE)
+                    {
+                        nodes.add(this->parse_block());
+                    }
+                    else if (this->get_token().M_type == token_type::TOKEN_KEYWORD)
+                    {
+                        if (this->get_token().M_lexeme == "if" || this->get_token().M_lexeme == "elif" || this->get_token().M_lexeme == "else")
+                            nodes.add(this->parse_if_elif_else());
+                    }
+                    else if (this->get_token().M_type == token_type::TOKEN_IDENTIFIER && (this->M_tokens[this->M_current_parser + 1].M_type != token_type::TOKEN_COLON || this->M_tokens[this->M_current_parser + 1].M_type == token_type::TOKEN_LEFT_PAREN))
                     {
                         // expr, function calls, statements
                         horizon_deps::sptr<ast_node> x1;
@@ -389,7 +451,7 @@ namespace horizon
         {
             while (!this->has_reached_end())
             {
-                this->M_ast = this->parse_block();
+                this->M_ast = this->parse_if_elif_else();
                 if (!this->M_ast)
                     return false;
                 this->M_ast->print();
