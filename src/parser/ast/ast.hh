@@ -34,12 +34,87 @@ namespace horizon
           public:
             inline ast_operand_node(const T &val)
                 : M_val(val) {}
+
             inline void print() const override
             {
                 if constexpr (std::is_same<T, horizon_deps::string>::value)
-                    std::cout << (this->M_val.c_str() == nullptr ? "(null)" : this->M_val.c_str());
+                    std::cout << PURPLE_FG << (this->M_val.c_str() == nullptr ? "(null)" : this->M_val.c_str()) << RESET_COLOR;
                 else
-                    std::cout << this->M_val;
+                    std::cout << GREEN_FG << this->M_val << RESET_COLOR;
+            }
+        };
+
+        class ast_post_unary_operation_node : public ast_node
+        {
+            horizon_deps::string M_identifier;
+            token_type M_operator;
+
+          public:
+            inline ast_post_unary_operation_node(horizon_deps::string &&operand, token_type opr)
+                : M_identifier(std::move(operand)), M_operator(opr) {}
+
+            inline void print() const override
+            {
+                const char *to_str[] =
+                    {
+                        "TOKEN_IDENTIFIER",
+                        "TOKEN_CHAR_LITERAL",
+                        "TOKEN_STRING_LITERAL",
+                        "TOKEN_INTEGER_LITERAL",
+                        "TOKEN_DECIMAL_LITERAL",
+                        "+",
+                        "-",
+                        "*",
+                        "**",
+                        "/",
+                        "%",
+                        "==",
+                        "!=",
+                        ">",
+                        "<",
+                        ">=",
+                        "<=",
+                        "!",
+                        "&&",
+                        "||",
+                        "~",
+                        "&",
+                        "|",
+                        "^",
+                        "<<",
+                        ">>",
+                        "=",
+                        "+=",
+                        "-=",
+                        "*=",
+                        "**=",
+                        "/=",
+                        "%=",
+                        "&=",
+                        "|=",
+                        "^=",
+                        "<<=",
+                        ">>=",
+                        "++",
+                        "--",
+                        "?",
+                        ";",
+                        ":",
+                        ",",
+                        ".",
+                        ")",
+                        "(",
+                        "}",
+                        "{",
+                        "]",
+                        "[",
+                        "TOKEN_KEYWORD",
+                        "TOKEN_PRIMARY_TYPE",
+                        "TOKEN_END_OF_FILE"};
+                printf("( ");
+                std::cout << PURPLE_FG << this->M_identifier.c_str() << RESET_COLOR;
+                std::cout << " " << BLUE_FG << to_str[(unsigned)this->M_operator] << RESET_COLOR " ";
+                printf(" )");
             }
         };
 
@@ -113,7 +188,7 @@ namespace horizon
                         "TOKEN_END_OF_FILE"};
                 printf("( ");
                 this->M_left->print();
-                std::cout << " " << to_str[(unsigned)this->M_operator] << " ";
+                std::cout << " " << BLUE_FG << to_str[(unsigned)this->M_operator] << RESET_COLOR " ";
                 this->M_right->print();
                 printf(" )");
             }
@@ -130,10 +205,10 @@ namespace horizon
 
             inline void print() const override
             {
-                std::cout << "VAR_DECL TYPE: " << M_type.c_str() << "(\n";
+                std::cout << "VAR_DECL TYPE: " << RED_FG << M_type.c_str() << RESET_COLOR "(\n";
                 for (const horizon_deps::pair<horizon_deps::string, horizon_deps::sptr<ast_node>> &i : this->M_variables)
                 {
-                    std::cout << "\tNAME: " << (i.get_first().c_str() == nullptr ? "(null)" : i.get_first().c_str()) << "    VALUE: ";
+                    std::cout << "\tNAME: " << PURPLE_FG << (i.get_first().c_str() == nullptr ? "(null)" : i.get_first().c_str()) << RESET_COLOR "    VALUE: ";
                     if (i.raw_second())
                         i.get_second()->print();
                     std::cout << "\n";
@@ -153,7 +228,7 @@ namespace horizon
 
             inline void print() const override
             {
-                std::cout << "CALL NAME: " << this->M_identifier.c_str() << "( ";
+                std::cout << "CALL NAME: " << PURPLE_FG << this->M_identifier.c_str() << RESET_COLOR "( ";
                 for (std::size_t i = 0; i < this->M_arguments.length(); i++)
                 {
                     if (this->M_arguments[i])
@@ -162,6 +237,31 @@ namespace horizon
                         std::cout << (i < this->M_arguments.length() - 1 ? ", " : " )");
                     }
                 }
+            }
+        };
+
+        class ast_block : public ast_node
+        {
+            horizon_deps::vector<horizon_deps::sptr<ast_node>> M_nodes;
+
+          public:
+            inline ast_block(horizon_deps::vector<horizon_deps::sptr<ast_node>> &&nodes)
+                : M_nodes(std::move(nodes)) {}
+
+            inline void print() const override
+            {
+                std::cout << "BLOCK {\n";
+                for (std::size_t i = 0; i < this->M_nodes.length(); i++)
+                {
+
+                    if (this->M_nodes[i])
+                    {
+                        std::cout << YELLOW_FG << i << RESET_COLOR "\n";
+                        this->M_nodes[i]->print();
+                        std::cout << "\n";
+                    }
+                }
+                std::cout << "}\n";
             }
         };
     }
