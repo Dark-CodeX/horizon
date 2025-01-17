@@ -44,6 +44,48 @@ namespace horizon
             }
         }
 
+        horizon_deps::sptr<ast_node> parser::parse_do_while_loop()
+        {
+            horizon_deps::sptr<ast_node> block = nullptr;
+            horizon_deps::sptr<ast_node> condition = nullptr;
+
+            this->post_advance();
+            block = this->parse_block();
+
+            if (this->get_token().M_lexeme == "while")
+            {
+                this->post_advance();
+                if (this->get_token().M_type != token_type::TOKEN_LEFT_PAREN)
+                {
+                    horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"expected '(' before '", this->get_token().M_lexeme, "'"});
+                    return nullptr;
+                }
+                else
+                    this->post_advance();
+                if (this->get_token().M_type != token_type::TOKEN_RIGHT_PAREN)
+                {
+                    condition = this->parse_operators();
+                    if (this->get_token().M_type != token_type::TOKEN_RIGHT_PAREN)
+                    {
+                        horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"expected ')', but got", this->get_token().M_lexeme});
+                        return nullptr;
+                    }
+                    this->post_advance();
+                }
+                else
+                {
+                    horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"expected an expression before '", this->get_token().M_lexeme, "'"});
+                    return nullptr;
+                }
+                return new ast_do_while_loop(std::move(block), std::move(condition));
+            }
+            else
+            {
+                horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"expected 'while', but got", this->get_token().M_lexeme});
+                return nullptr;
+            }
+        }
+
         horizon_deps::sptr<ast_node> parser::parse_while_loop()
         {
             horizon_deps::sptr<ast_node> condition = nullptr;
@@ -195,6 +237,8 @@ namespace horizon
                             nodes.add(this->parse_for_loop());
                         else if (this->get_token().M_lexeme == "while")
                             nodes.add(this->parse_while_loop());
+                        else if (this->get_token().M_lexeme == "do")
+                            nodes.add(this->parse_do_while_loop());
                     }
                     else if (this->get_token().M_type == token_type::TOKEN_IDENTIFIER && (this->M_tokens[this->M_current_parser + 1].M_type != token_type::TOKEN_COLON || this->M_tokens[this->M_current_parser + 1].M_type == token_type::TOKEN_LEFT_PAREN))
                     {
@@ -532,7 +576,7 @@ namespace horizon
         {
             while (!this->has_reached_end())
             {
-                this->M_ast = this->parse_while_loop();
+                this->M_ast = this->parse_do_while_loop();
                 if (!this->M_ast)
                     return false;
                 this->M_ast->print();
