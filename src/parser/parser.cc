@@ -39,17 +39,36 @@ namespace horizon
             }
             else
             {
+                this->handle_eof();
                 horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"expected ';', but got", this->get_token().M_lexeme});
                 return false;
             }
         }
 
+        void parser::handle_eof()
+        {
+            if (this->get_token().M_type == token_type::TOKEN_END_OF_FILE && this->M_current_parser == 1)
+                this->M_current_parser--; // makes M_current_parser 0, pointing to first token
+        }
+
         horizon_deps::sptr<ast_node> parser::parse_do_while_loop()
         {
+            if (this->get_token().M_lexeme != "do")
+            {
+                this->handle_eof();
+                horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"expected 'do', but got", this->get_token().M_lexeme});
+                return nullptr;
+            }
             horizon_deps::sptr<ast_node> block = nullptr;
             horizon_deps::sptr<ast_node> condition = nullptr;
 
             this->post_advance();
+            if (this->get_token().M_type != token_type::TOKEN_LEFT_BRACE)
+            {
+                this->handle_eof();
+                horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"expected '{', but got", this->get_token().M_lexeme});
+                return nullptr;
+            }
             block = this->parse_block();
 
             if (this->get_token().M_lexeme == "while")
@@ -57,6 +76,7 @@ namespace horizon
                 this->post_advance();
                 if (this->get_token().M_type != token_type::TOKEN_LEFT_PAREN)
                 {
+                    this->handle_eof();
                     horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"expected '(' before '", this->get_token().M_lexeme, "'"});
                     return nullptr;
                 }
@@ -67,6 +87,7 @@ namespace horizon
                     condition = this->parse_operators();
                     if (this->get_token().M_type != token_type::TOKEN_RIGHT_PAREN)
                     {
+                        this->handle_eof();
                         horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"expected ')', but got", this->get_token().M_lexeme});
                         return nullptr;
                     }
@@ -74,6 +95,7 @@ namespace horizon
                 }
                 else
                 {
+                    this->handle_eof();
                     horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"expected an expression before '", this->get_token().M_lexeme, "'"});
                     return nullptr;
                 }
@@ -81,6 +103,7 @@ namespace horizon
             }
             else
             {
+                this->handle_eof();
                 horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"expected 'while', but got", this->get_token().M_lexeme});
                 return nullptr;
             }
@@ -88,12 +111,19 @@ namespace horizon
 
         horizon_deps::sptr<ast_node> parser::parse_while_loop()
         {
+            if (this->get_token().M_lexeme != "while")
+            {
+                this->handle_eof();
+                horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"expected 'while', but got", this->get_token().M_lexeme});
+                return nullptr;
+            }
             horizon_deps::sptr<ast_node> condition = nullptr;
             horizon_deps::sptr<ast_node> block = nullptr;
 
             this->post_advance();
             if (this->get_token().M_type != token_type::TOKEN_LEFT_PAREN)
             {
+                this->handle_eof();
                 horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"expected '(' before '", this->get_token().M_lexeme, "'"});
                 return nullptr;
             }
@@ -104,6 +134,7 @@ namespace horizon
                 condition = this->parse_operators();
                 if (this->get_token().M_type != token_type::TOKEN_RIGHT_PAREN)
                 {
+                    this->handle_eof();
                     horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"expected ')', but got", this->get_token().M_lexeme});
                     return nullptr;
                 }
@@ -111,7 +142,14 @@ namespace horizon
             }
             else
             {
+                this->handle_eof();
                 horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"expected an expression before '", this->get_token().M_lexeme, "'"});
+                return nullptr;
+            }
+            if (this->get_token().M_type != token_type::TOKEN_LEFT_BRACE)
+            {
+                this->handle_eof();
+                horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"expected '{', but got", this->get_token().M_lexeme});
                 return nullptr;
             }
             block = this->parse_block();
@@ -120,6 +158,12 @@ namespace horizon
 
         horizon_deps::sptr<ast_node> parser::parse_for_loop()
         {
+            if (this->get_token().M_lexeme != "for")
+            {
+                this->handle_eof();
+                horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"expected 'for', but got", this->get_token().M_lexeme});
+                return nullptr;
+            }
             horizon_deps::sptr<ast_node> variable_decl = nullptr;
             horizon_deps::sptr<ast_node> condition = nullptr;
             horizon_deps::sptr<ast_node> step = nullptr;
@@ -128,6 +172,7 @@ namespace horizon
             this->post_advance();
             if (this->get_token().M_type != token_type::TOKEN_LEFT_PAREN)
             {
+                this->handle_eof();
                 horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"expected '(' before '", this->get_token().M_lexeme, "'"});
                 return nullptr;
             }
@@ -154,11 +199,18 @@ namespace horizon
                 step = this->parse_operators();
                 if (this->get_token().M_type != token_type::TOKEN_RIGHT_PAREN)
                 {
+                    this->handle_eof();
                     horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"expected ')', but got", this->get_token().M_lexeme});
                     return nullptr;
                 }
             }
             this->post_advance();
+            if (this->get_token().M_type != token_type::TOKEN_LEFT_BRACE)
+            {
+                this->handle_eof();
+                horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"expected '{', but got", this->get_token().M_lexeme});
+                return nullptr;
+            }
             block = this->parse_block();
             return new ast_for_loop(std::move(variable_decl), std::move(condition), std::move(step), std::move(block));
         }
@@ -176,6 +228,7 @@ namespace horizon
                     this->post_advance();
                     if (this->get_token().M_type != token_type::TOKEN_LEFT_PAREN)
                     {
+                        this->handle_eof();
                         horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"expected '(' before '", this->get_token().M_lexeme, "'"});
                         return nullptr;
                     }
@@ -191,6 +244,7 @@ namespace horizon
                         this->post_advance();
                         if (this->get_token().M_type != token_type::TOKEN_LEFT_PAREN)
                         {
+                            this->handle_eof();
                             horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"expected '(' before '", this->get_token().M_lexeme, "'"});
                             return nullptr;
                         }
@@ -211,6 +265,7 @@ namespace horizon
             }
             else
             {
+                this->handle_eof();
                 horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {horizon_deps::string("'") + this->get_token().M_lexeme + "' without a prior 'if'"});
                 return nullptr;
             }
@@ -267,6 +322,7 @@ namespace horizon
                 }
                 if (this->get_token().M_type != token_type::TOKEN_RIGHT_BRACE)
                 {
+                    horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"expected '}', but got", this->get_token().M_lexeme});
                     return nullptr;
                 }
                 else
@@ -286,6 +342,7 @@ namespace horizon
                 horizon_deps::string &type = this->M_tokens[this->M_current_parser++].M_lexeme;
                 if (this->get_token().M_type != token_type::TOKEN_COLON)
                 {
+                    this->handle_eof();
                     horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"expected ':' after data type", type});
                     return nullptr;
                 }
@@ -295,6 +352,7 @@ namespace horizon
                     horizon_deps::pair<horizon_deps::string, horizon_deps::sptr<ast_node>> pair;
                     if (this->get_token().M_type == token_type::TOKEN_PRIMARY_TYPE || this->get_token().M_type == token_type::TOKEN_KEYWORD)
                     {
+                        this->handle_eof();
                         horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"reserved word", this->get_token().M_lexeme, "cannot be used as an identifier"});
                         return nullptr;
                     }
@@ -302,6 +360,7 @@ namespace horizon
                         pair.raw_first() = new horizon_deps::string(this->get_token().M_lexeme);
                     else
                     {
+                        this->handle_eof();
                         horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"expected an identifier, but got", this->get_token().M_lexeme});
                         return nullptr;
                     }
@@ -571,6 +630,7 @@ namespace horizon
             }
             else
             {
+                this->handle_eof();
                 horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"unexpected token", this->get_token().M_lexeme});
                 return nullptr;
             }

@@ -36,6 +36,7 @@ namespace horizon
             [[nodiscard]] const token &get_token() const;
 
             [[nodiscard]] bool handle_semicolon();
+            void handle_eof();
 
             [[nodiscard]] horizon_deps::sptr<ast_node> parse_do_while_loop();
             [[nodiscard]] horizon_deps::sptr<ast_node> parse_while_loop();
