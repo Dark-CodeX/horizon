@@ -60,6 +60,16 @@ namespace horizon
                 return nullptr;
             }
             file->M_content.length() = LEN;
+            if (file->M_content.is_empty())
+            {
+                std::fclose(fptr);
+                delete file;
+                if (COLOR_ERR)
+                    std::fprintf(stderr, "horizon: " ENCLOSE(RED_FG, "error[E1]:") " " ENCLOSE(WHITE_FG, "'%s'") " was empty: %s\n", loc, "0 byte file size");
+                else
+                    std::fprintf(stderr, "horizon: error[E1]: '%s' was empty: %s\n", loc, "0 byte file size");
+                return nullptr;
+            }
             std::fclose(fptr);
             return file;
         }
