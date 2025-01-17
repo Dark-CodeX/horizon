@@ -99,7 +99,7 @@ namespace horizon
                     horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"expected an expression before '", this->get_token().M_lexeme, "'"});
                     return nullptr;
                 }
-                return new ast_do_while_loop(std::move(block), std::move(condition));
+                return new ast_do_while_loop_node(std::move(block), std::move(condition));
             }
             else
             {
@@ -153,7 +153,7 @@ namespace horizon
                 return nullptr;
             }
             block = this->parse_block();
-            return new ast_while_loop(std::move(condition), std::move(block));
+            return new ast_while_loop_node(std::move(condition), std::move(block));
         }
 
         horizon_deps::sptr<ast_node> parser::parse_for_loop()
@@ -212,7 +212,7 @@ namespace horizon
                 return nullptr;
             }
             block = this->parse_block();
-            return new ast_for_loop(std::move(variable_decl), std::move(condition), std::move(step), std::move(block));
+            return new ast_for_loop_node(std::move(variable_decl), std::move(condition), std::move(step), std::move(block));
         }
 
         horizon_deps::sptr<ast_node> parser::parse_if_elif_else()
@@ -261,7 +261,7 @@ namespace horizon
                     else_block = this->parse_block();
                 }
 
-                return new ast_if_elif_else(std::move(if_condition_block), std::move(elif_condition_block), std::move(else_block));
+                return new ast_if_elif_else_node(std::move(if_condition_block), std::move(elif_condition_block), std::move(else_block));
             }
             else
             {
@@ -328,7 +328,7 @@ namespace horizon
                 else
                     this->post_advance();
                 nodes.shrink_to_fit();
-                return new ast_block(std::move(nodes));
+                return new ast_block_node(std::move(nodes));
             }
             else
                 return this->parse_variable_decl();
@@ -380,7 +380,7 @@ namespace horizon
                     vec.add(std::move(pair));
                 }
                 vec.shrink_to_fit();
-                return new ast_variable_declaration(std::move(type), std::move(vec));
+                return new ast_variable_declaration_node(std::move(type), std::move(vec));
             }
             return nullptr;
         }
@@ -583,7 +583,7 @@ namespace horizon
                     if (this->get_token().M_type == token_type::TOKEN_RIGHT_PAREN)
                         this->post_advance();
                     vec.shrink_to_fit();
-                    return new ast_function_call(std::move(identifier), std::move(vec));
+                    return new ast_function_call_node(std::move(identifier), std::move(vec));
                 }
                 else if (this->get_token().M_type == token_type::TOKEN_INCREMENT || this->get_token().M_type == token_type::TOKEN_DECREMENT)
                 {

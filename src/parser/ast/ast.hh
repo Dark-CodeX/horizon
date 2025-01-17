@@ -194,13 +194,13 @@ namespace horizon
             }
         };
 
-        class ast_variable_declaration : public ast_node
+        class ast_variable_declaration_node : public ast_node
         {
             horizon_deps::string M_type;
             horizon_deps::vector<horizon_deps::pair<horizon_deps::string, horizon_deps::sptr<ast_node>>> M_variables;
 
           public:
-            inline ast_variable_declaration(horizon_deps::string &&type, horizon_deps::vector<horizon_deps::pair<horizon_deps::string, horizon_deps::sptr<ast_node>>> &&vars)
+            inline ast_variable_declaration_node(horizon_deps::string &&type, horizon_deps::vector<horizon_deps::pair<horizon_deps::string, horizon_deps::sptr<ast_node>>> &&vars)
                 : M_type(std::move(type)), M_variables(std::move(vars)) {}
 
             inline void print() const override
@@ -217,13 +217,13 @@ namespace horizon
             }
         };
 
-        class ast_function_call : public ast_node
+        class ast_function_call_node : public ast_node
         {
             horizon_deps::string M_identifier;
             horizon_deps::vector<horizon_deps::sptr<ast_node>> M_arguments;
 
           public:
-            inline ast_function_call(horizon_deps::string &&identifier, horizon_deps::vector<horizon_deps::sptr<ast_node>> &&args)
+            inline ast_function_call_node(horizon_deps::string &&identifier, horizon_deps::vector<horizon_deps::sptr<ast_node>> &&args)
                 : M_identifier(std::move(identifier)), M_arguments(std::move(args)) {}
 
             inline void print() const override
@@ -241,12 +241,12 @@ namespace horizon
             }
         };
 
-        class ast_block : public ast_node
+        class ast_block_node : public ast_node
         {
             horizon_deps::vector<horizon_deps::sptr<ast_node>> M_nodes;
 
           public:
-            inline ast_block(horizon_deps::vector<horizon_deps::sptr<ast_node>> &&nodes)
+            inline ast_block_node(horizon_deps::vector<horizon_deps::sptr<ast_node>> &&nodes)
                 : M_nodes(std::move(nodes)) {}
 
             inline void print() const override
@@ -266,14 +266,14 @@ namespace horizon
             }
         };
 
-        class ast_if_elif_else : public ast_node
+        class ast_if_elif_else_node : public ast_node
         {
             horizon_deps::pair<horizon_deps::sptr<ast_node>> M_if_condition_block;
             horizon_deps::vector<horizon_deps::pair<horizon_deps::sptr<ast_node>>> M_elif_condition_block;
             horizon_deps::sptr<ast_node> M_else_block;
 
           public:
-            inline ast_if_elif_else(horizon_deps::pair<horizon_deps::sptr<ast_node>> &&if_cond_block, horizon_deps::vector<horizon_deps::pair<horizon_deps::sptr<ast_node>>> &&elif_cond_block, horizon_deps::sptr<ast_node> &&else_block)
+            inline ast_if_elif_else_node(horizon_deps::pair<horizon_deps::sptr<ast_node>> &&if_cond_block, horizon_deps::vector<horizon_deps::pair<horizon_deps::sptr<ast_node>>> &&elif_cond_block, horizon_deps::sptr<ast_node> &&else_block)
                 : M_if_condition_block(std::move(if_cond_block)), M_elif_condition_block(std::move(elif_cond_block)), M_else_block(std::move(else_block)) {}
 
             inline void print() const override
@@ -305,7 +305,7 @@ namespace horizon
             }
         };
 
-        class ast_for_loop : public ast_node
+        class ast_for_loop_node : public ast_node
         {
             horizon_deps::sptr<ast_node> M_variable_decl;
             horizon_deps::sptr<ast_node> M_condition;
@@ -313,7 +313,7 @@ namespace horizon
             horizon_deps::sptr<ast_node> M_block;
 
           public:
-            inline ast_for_loop(horizon_deps::sptr<ast_node> &&var_decl, horizon_deps::sptr<ast_node> &&condition, horizon_deps::sptr<ast_node> &&step, horizon_deps::sptr<ast_node> &&block)
+            inline ast_for_loop_node(horizon_deps::sptr<ast_node> &&var_decl, horizon_deps::sptr<ast_node> &&condition, horizon_deps::sptr<ast_node> &&step, horizon_deps::sptr<ast_node> &&block)
                 : M_variable_decl(std::move(var_decl)), M_condition(std::move(condition)), M_step(std::move(step)), M_block(std::move(block)) {}
 
             inline void print() const override
@@ -340,13 +340,13 @@ namespace horizon
             }
         };
 
-        class ast_while_loop : public ast_node
+        class ast_while_loop_node : public ast_node
         {
             horizon_deps::sptr<ast_node> M_condition;
             horizon_deps::sptr<ast_node> M_block;
 
           public:
-            inline ast_while_loop(horizon_deps::sptr<ast_node> &&condition, horizon_deps::sptr<ast_node> &&block)
+            inline ast_while_loop_node(horizon_deps::sptr<ast_node> &&condition, horizon_deps::sptr<ast_node> &&block)
                 : M_condition(std::move(condition)), M_block(std::move(block)) {}
 
             inline void print() const override
@@ -366,13 +366,13 @@ namespace horizon
             }
         };
 
-        class ast_do_while_loop : public ast_node
+        class ast_do_while_loop_node : public ast_node
         {
             horizon_deps::sptr<ast_node> M_block;
             horizon_deps::sptr<ast_node> M_condition;
 
           public:
-            inline ast_do_while_loop(horizon_deps::sptr<ast_node> &&block, horizon_deps::sptr<ast_node> &&condition)
+            inline ast_do_while_loop_node(horizon_deps::sptr<ast_node> &&block, horizon_deps::sptr<ast_node> &&condition)
                 : M_block(std::move(block)), M_condition(std::move(condition)) {}
 
             inline void print() const override
