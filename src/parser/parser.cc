@@ -484,8 +484,20 @@ namespace horizon
 
         horizon_deps::sptr<ast_node> parser::parse_exponent()
         {
-            horizon_deps::sptr<ast_node> left = this->parse_identifier();
+            horizon_deps::sptr<ast_node> left = this->parse_member_access();
             while (this->get_token().M_type == token_type::TOKEN_ARITHMETIC_POWER)
+            {
+                const token &operator_token = this->post_advance();
+                horizon_deps::sptr<ast_node> right = this->parse_member_access();
+                left = new ast_binary_operation_node(std::move(left), operator_token.M_type, std::move(right));
+            }
+            return left;
+        }
+
+        horizon_deps::sptr<ast_node> parser::parse_member_access()
+        {
+            horizon_deps::sptr<ast_node> left = this->parse_identifier();
+            while (this->get_token().M_type == token_type::TOKEN_DOT)
             {
                 const token &operator_token = this->post_advance();
                 horizon_deps::sptr<ast_node> right = this->parse_identifier();
