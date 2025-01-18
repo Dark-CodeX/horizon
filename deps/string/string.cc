@@ -334,6 +334,40 @@ namespace horizon
             return string::str_cmp(this->str, src.str);
         }
 
+        string &string::wrap(const char *__s)
+        {
+            if (__s)
+            {
+                std::size_t __s_len = string::str_len(__s), b_len = 0;
+                char *buffer = static_cast<char *>(std::calloc(__s_len * 2 + this->len + 1, sizeof(char)));
+                horizon_misc::exit_heap_fail(buffer, "horizon::horizon_deps::string");
+                string::str_catcpy(buffer, __s, b_len);
+                string::str_catcpy(buffer, this->str, b_len);
+                string::str_catcpy(buffer, __s, b_len);
+                this->clear();
+                this->str = buffer;
+                this->len = b_len;
+            }
+            return *this;
+        }
+
+        string &string::wrap(const string &__s)
+        {
+            if (__s.str)
+            {
+                std::size_t b_len = 0;
+                char *buffer = static_cast<char *>(std::calloc(__s.len * 2 + this->len + 1, sizeof(char)));
+                horizon_misc::exit_heap_fail(buffer, "horizon::horizon_deps::string");
+                string::str_catcpy(buffer, __s.str, b_len);
+                string::str_catcpy(buffer, this->str, b_len);
+                string::str_catcpy(buffer, __s.str, b_len);
+                this->clear();
+                this->str = buffer;
+                this->len = b_len;
+            }
+            return *this;
+        }
+
         string &string::clear()
         {
             if (this->str)

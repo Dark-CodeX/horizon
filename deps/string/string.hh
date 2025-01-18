@@ -4,7 +4,6 @@
  * @author Tushar Chaurasia (Dark-CodeX)
  */
 
-
 #ifndef HORIZON_DEPS_STRING_STRING_HH
 #define HORIZON_DEPS_STRING_STRING_HH
 
@@ -33,7 +32,7 @@ namespace horizon
          */
         class string
         {
-        private:
+          private:
             static char *&str_catcpy(char *&dest, const char *src, std::size_t &updating_length);
             static char *&str_catcpy(char *&dest, const char &c, std::size_t &updating_length);
             static std::size_t str_len(const char *s);
@@ -41,11 +40,11 @@ namespace horizon
             static bool str_cmp(const char *str1, const char *str2);
             static bool str_cmp(const char *str, const std::size_t &len, const char &c);
 
-        private:
+          private:
             char *str;
             std::size_t len;
 
-        public:
+          public:
             string();
             string(const char &c);
             string(const char *src);
@@ -69,6 +68,8 @@ namespace horizon
             [[nodiscard]] bool compare(const char &c) const;
             [[nodiscard]] bool compare(const char *src) const;
             [[nodiscard]] bool compare(const string &src) const;
+            string &wrap(const char *__s);
+            string &wrap(const string &__s);
             string &clear();
             string &resize(const std::size_t &new_length);
             [[nodiscard]] string substr(const std::size_t &index, std::size_t sub_len = static_cast<std::size_t>(-1)) const;
