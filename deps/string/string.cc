@@ -334,7 +334,7 @@ namespace horizon
             return string::str_cmp(this->str, src.str);
         }
 
-        string &string::wrap(const char *__s)
+        string string::wrap(const char *__s) const
         {
             if (__s)
             {
@@ -344,14 +344,16 @@ namespace horizon
                 string::str_catcpy(buffer, __s, b_len);
                 string::str_catcpy(buffer, this->str, b_len);
                 string::str_catcpy(buffer, __s, b_len);
-                this->clear();
-                this->str = buffer;
-                this->len = b_len;
+
+                string val;
+                val.str = buffer;
+                val.len = b_len;
+                return val;
             }
             return *this;
         }
 
-        string &string::wrap(const string &__s)
+        string string::wrap(const string &__s) const
         {
             if (__s.str)
             {
@@ -361,9 +363,11 @@ namespace horizon
                 string::str_catcpy(buffer, __s.str, b_len);
                 string::str_catcpy(buffer, this->str, b_len);
                 string::str_catcpy(buffer, __s.str, b_len);
-                this->clear();
-                this->str = buffer;
-                this->len = b_len;
+
+                string val;
+                val.str = buffer;
+                val.len = b_len;
+                return val;
             }
             return *this;
         }

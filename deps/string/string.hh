@@ -68,8 +68,8 @@ namespace horizon
             [[nodiscard]] bool compare(const char &c) const;
             [[nodiscard]] bool compare(const char *src) const;
             [[nodiscard]] bool compare(const string &src) const;
-            string &wrap(const char *__s);
-            string &wrap(const string &__s);
+            [[nodiscard]] string wrap(const char *__s) const;
+            [[nodiscard]] string wrap(const string &__s) const;
             string &clear();
             string &resize(const std::size_t &new_length);
             [[nodiscard]] string substr(const std::size_t &index, std::size_t sub_len = static_cast<std::size_t>(-1)) const;
