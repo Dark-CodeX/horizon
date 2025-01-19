@@ -561,7 +561,7 @@ namespace horizon
 
         horizon_deps::sptr<ast_node> parser::parse_assignment_operator()
         {
-            horizon_deps::sptr<ast_node> left = this->parse_logical_or();
+            horizon_deps::sptr<ast_node> left = this->parse_ternary_operator();
             if (!left)
                 return nullptr;
             while (this->get_token().M_type == token_type::TOKEN_ASSIGN ||
@@ -578,12 +578,62 @@ namespace horizon
                    this->get_token().M_type == token_type::TOKEN_ASSIGN_RIGHT_SHIFT)
             {
                 const token &operator_token = this->post_advance();
-                horizon_deps::sptr<ast_node> right = this->parse_logical_or();
+                horizon_deps::sptr<ast_node> right = this->parse_ternary_operator();
                 if (!right)
                     return nullptr;
                 left = new ast_binary_operation_node(std::move(left), operator_token.M_type, std::move(right));
             }
             return left;
+        }
+
+        horizon_deps::sptr<ast_node> parser::parse_ternary_operator()
+        {
+            // a < b ? true : false
+            horizon_deps::sptr<ast_node> condition;
+            horizon_deps::sptr<ast_node> val_if_true;
+            horizon_deps::sptr<ast_node> val_if_false;
+            bool is_if_used = false;
+            condition = this->parse_logical_or(); // if `if` is used, then it is value_if_true
+            if (!condition)
+                return nullptr;
+            if (this->get_token().M_type != token_type::TOKEN_QUESTION)
+            {
+                if (this->get_token().M_lexeme == "if")
+                    is_if_used = true;
+                else
+                    // this was not a ternary operator, as there is no ? token
+                    // Hence, we will return the condition or now it is an expression too
+                    return condition;
+            }
+            this->post_advance();
+            val_if_true = this->parse_logical_or(); // if `if` is used, then it is condition
+            if (!val_if_true)
+                return nullptr;
+            if (this->get_token().M_type != token_type::TOKEN_COLON)
+            {
+                if (this->get_token().M_lexeme != "else")
+                {
+                    if (is_if_used)
+                    {
+                        this->handle_eof();
+                        horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"expected 'else', but got", this->get_token().M_lexeme.wrap("'")});
+                        return nullptr;
+                    }
+                    else
+                    {
+                        this->handle_eof();
+                        horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"expected ':', but got", this->get_token().M_lexeme.wrap("'")});
+                        return nullptr;
+                    }
+                }
+            }
+            this->post_advance();
+            val_if_false = this->parse_logical_or();
+            if (!val_if_false)
+                return nullptr;
+            if (is_if_used)
+                return new ast_ternary_operator_node(std::move(val_if_true), std::move(condition), std::move(val_if_false));
+            return new ast_ternary_operator_node(std::move(condition), std::move(val_if_true), std::move(val_if_false));
         }
 
         horizon_deps::sptr<ast_node> parser::parse_logical_or()
