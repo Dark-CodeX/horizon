@@ -102,11 +102,13 @@ namespace horizon
                             }
                             temp_vec.add(std::move(temp_pair2));
                         }
+                        temp_vec.shrink_to_fit();
                         temp_pair1.raw_second() = new horizon_deps::vector<horizon_deps::pair<horizon_deps::string, horizon_deps::sptr<ast_node>>>(std::move(temp_vec));
                     }
                 }
                 params.add(std::move(temp_pair1));
             }
+            params.shrink_to_fit();
             return new ast_parameter_node(std::move(params));
         }
 
