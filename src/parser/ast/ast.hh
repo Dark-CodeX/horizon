@@ -194,6 +194,31 @@ namespace horizon
             }
         };
 
+        class ast_ternary_operator_node : public ast_node
+        {
+            horizon_deps::sptr<ast_node> M_condition;
+            horizon_deps::sptr<ast_node> M_val_if_true;
+            horizon_deps::sptr<ast_node> M_val_if_false;
+
+          public:
+            inline ast_ternary_operator_node(horizon_deps::sptr<ast_node> &&cond, horizon_deps::sptr<ast_node> &&if_true, horizon_deps::sptr<ast_node> &&if_false)
+                : M_condition(std::move(cond)), M_val_if_true(std::move(if_true)), M_val_if_false(std::move(if_false)) {}
+
+            inline void print() const override
+            {
+                std::cout << "TERNARY: CONDITION: ";
+                if (this->M_condition)
+                    this->M_condition->print();
+                std::cout << "VALUE_IF_TRUE: ";
+                if (this->M_val_if_true)
+                    this->M_val_if_true->print();
+                std::cout << "VALUE_IF_FALSE: ";
+                if (this->M_val_if_false)
+                    this->M_val_if_false->print();
+                std::cout << "\n";
+            }
+        };
+
         class ast_variable_declaration_node : public ast_node
         {
             horizon_deps::string M_type;
