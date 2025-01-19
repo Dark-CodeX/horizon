@@ -560,6 +560,8 @@ namespace horizon
         horizon_deps::sptr<ast_node> parser::parse_assignment_operator()
         {
             horizon_deps::sptr<ast_node> left = this->parse_logical_or();
+            if (!left)
+                return nullptr;
             while (this->get_token().M_type == token_type::TOKEN_ASSIGN ||
                    this->get_token().M_type == token_type::TOKEN_ASSIGN_ADD ||
                    this->get_token().M_type == token_type::TOKEN_ASSIGN_SUBSTRACT ||
@@ -575,6 +577,8 @@ namespace horizon
             {
                 const token &operator_token = this->post_advance();
                 horizon_deps::sptr<ast_node> right = this->parse_logical_or();
+                if (!right)
+                    return nullptr;
                 left = new ast_binary_operation_node(std::move(left), operator_token.M_type, std::move(right));
             }
             return left;
@@ -583,10 +587,14 @@ namespace horizon
         horizon_deps::sptr<ast_node> parser::parse_logical_or()
         {
             horizon_deps::sptr<ast_node> left = this->parse_logical_and();
+            if (!left)
+                return nullptr;
             while (this->get_token().M_type == token_type::TOKEN_LOGICAL_OR)
             {
                 const token &operator_token = this->post_advance();
                 horizon_deps::sptr<ast_node> right = this->parse_logical_and();
+                if (!right)
+                    return nullptr;
                 left = new ast_binary_operation_node(std::move(left), operator_token.M_type, std::move(right));
             }
             return left;
@@ -595,10 +603,14 @@ namespace horizon
         horizon_deps::sptr<ast_node> parser::parse_logical_and()
         {
             horizon_deps::sptr<ast_node> left = this->parse_bitwise_or();
+            if (!left)
+                return nullptr;
             while (this->get_token().M_type == token_type::TOKEN_LOGICAL_AND)
             {
                 const token &operator_token = this->post_advance();
                 horizon_deps::sptr<ast_node> right = this->parse_bitwise_or();
+                if (!right)
+                    return nullptr;
                 left = new ast_binary_operation_node(std::move(left), operator_token.M_type, std::move(right));
             }
             return left;
@@ -607,10 +619,14 @@ namespace horizon
         horizon_deps::sptr<ast_node> parser::parse_bitwise_or()
         {
             horizon_deps::sptr<ast_node> left = this->parse_bitwise_xor();
+            if (!left)
+                return nullptr;
             while (this->get_token().M_type == token_type::TOKEN_BITWISE_OR)
             {
                 const token &operator_token = this->post_advance();
                 horizon_deps::sptr<ast_node> right = this->parse_bitwise_xor();
+                if (!right)
+                    return nullptr;
                 left = new ast_binary_operation_node(std::move(left), operator_token.M_type, std::move(right));
             }
             return left;
@@ -619,10 +635,14 @@ namespace horizon
         horizon_deps::sptr<ast_node> parser::parse_bitwise_xor()
         {
             horizon_deps::sptr<ast_node> left = this->parse_bitwise_and();
+            if (!left)
+                return nullptr;
             while (this->get_token().M_type == token_type::TOKEN_BITWISE_XOR)
             {
                 const token &operator_token = this->post_advance();
                 horizon_deps::sptr<ast_node> right = this->parse_bitwise_and();
+                if (!right)
+                    return nullptr;
                 left = new ast_binary_operation_node(std::move(left), operator_token.M_type, std::move(right));
             }
             return left;
@@ -631,10 +651,14 @@ namespace horizon
         horizon_deps::sptr<ast_node> parser::parse_bitwise_and()
         {
             horizon_deps::sptr<ast_node> left = this->parse_equality_operator();
+            if (!left)
+                return nullptr;
             while (this->get_token().M_type == token_type::TOKEN_BITWISE_AND)
             {
                 const token &operator_token = this->post_advance();
                 horizon_deps::sptr<ast_node> right = this->parse_equality_operator();
+                if (!right)
+                    return nullptr;
                 left = new ast_binary_operation_node(std::move(left), operator_token.M_type, std::move(right));
             }
             return left;
@@ -643,11 +667,15 @@ namespace horizon
         horizon_deps::sptr<ast_node> parser::parse_equality_operator()
         {
             horizon_deps::sptr<ast_node> left = this->parse_relational_operator();
+            if (!left)
+                return nullptr;
             while (this->get_token().M_type == token_type::TOKEN_RELATIONAL_EQUAL_TO ||
                    this->get_token().M_type == token_type::TOKEN_RELATIONAL_NOT_EQUAL_TO)
             {
                 const token &operator_token = this->post_advance();
                 horizon_deps::sptr<ast_node> right = this->parse_relational_operator();
+                if (!right)
+                    return nullptr;
                 left = new ast_binary_operation_node(std::move(left), operator_token.M_type, std::move(right));
             }
             return left;
@@ -656,6 +684,8 @@ namespace horizon
         horizon_deps::sptr<ast_node> parser::parse_relational_operator()
         {
             horizon_deps::sptr<ast_node> left = this->parse_bitwise_shift();
+            if (!left)
+                return nullptr;
             while (this->get_token().M_type == token_type::TOKEN_RELATIONAL_GREATER_THAN ||
                    this->get_token().M_type == token_type::TOKEN_RELATIONAL_LESS_THAN ||
                    this->get_token().M_type == token_type::TOKEN_RELATIONAL_GREATER_THAN_OR_EQUAL_TO ||
@@ -663,6 +693,8 @@ namespace horizon
             {
                 const token &operator_token = this->post_advance();
                 horizon_deps::sptr<ast_node> right = this->parse_bitwise_shift();
+                if (!right)
+                    return nullptr;
                 left = new ast_binary_operation_node(std::move(left), operator_token.M_type, std::move(right));
             }
             return left;
@@ -671,11 +703,15 @@ namespace horizon
         horizon_deps::sptr<ast_node> parser::parse_bitwise_shift()
         {
             horizon_deps::sptr<ast_node> left = this->parse_expr();
+            if (!left)
+                return nullptr;
             while (this->get_token().M_type == token_type::TOKEN_BITWISE_LEFT_SHIFT ||
                    this->get_token().M_type == token_type::TOKEN_BITWISE_RIGHT_SHIFT)
             {
                 const token &operator_token = this->post_advance();
                 horizon_deps::sptr<ast_node> right = this->parse_expr();
+                if (!right)
+                    return nullptr;
                 left = new ast_binary_operation_node(std::move(left), operator_token.M_type, std::move(right));
             }
             return left;
@@ -684,11 +720,15 @@ namespace horizon
         horizon_deps::sptr<ast_node> parser::parse_expr()
         {
             horizon_deps::sptr<ast_node> left = this->parse_term();
+            if (!left)
+                return nullptr;
             while (this->get_token().M_type == token_type::TOKEN_ARITHMETIC_ADD ||
                    this->get_token().M_type == token_type::TOKEN_ARITHMETIC_SUBSTRACT)
             {
                 const token &operator_token = this->post_advance();
                 horizon_deps::sptr<ast_node> right = this->parse_term();
+                if (!right)
+                    return nullptr;
                 left = new ast_binary_operation_node(std::move(left), operator_token.M_type, std::move(right));
             }
             return left;
@@ -697,12 +737,16 @@ namespace horizon
         horizon_deps::sptr<ast_node> parser::parse_term()
         {
             horizon_deps::sptr<ast_node> left = this->parse_exponent();
+            if (!left)
+                return nullptr;
             while (this->get_token().M_type == token_type::TOKEN_ARITHMETIC_MULTIPLY ||
                    this->get_token().M_type == token_type::TOKEN_ARITHMETIC_DIVIDE ||
                    this->get_token().M_type == token_type::TOKEN_ARITHMETIC_MODULUS)
             {
                 const token &operator_token = this->post_advance();
                 horizon_deps::sptr<ast_node> right = this->parse_exponent();
+                if (!right)
+                    return nullptr;
                 left = new ast_binary_operation_node(std::move(left), operator_token.M_type, std::move(right));
             }
             return left;
@@ -711,10 +755,14 @@ namespace horizon
         horizon_deps::sptr<ast_node> parser::parse_exponent()
         {
             horizon_deps::sptr<ast_node> left = this->parse_member_access();
+            if (!left)
+                return nullptr;
             while (this->get_token().M_type == token_type::TOKEN_ARITHMETIC_POWER)
             {
                 const token &operator_token = this->post_advance();
                 horizon_deps::sptr<ast_node> right = this->parse_member_access();
+                if (!right)
+                    return nullptr;
                 left = new ast_binary_operation_node(std::move(left), operator_token.M_type, std::move(right));
             }
             return left;
@@ -723,10 +771,14 @@ namespace horizon
         horizon_deps::sptr<ast_node> parser::parse_member_access()
         {
             horizon_deps::sptr<ast_node> left = this->parse_identifier();
+            if (!left)
+                return nullptr;
             while (this->get_token().M_type == token_type::TOKEN_DOT)
             {
                 const token &operator_token = this->post_advance();
                 horizon_deps::sptr<ast_node> right = this->parse_identifier();
+                if (!right)
+                    return nullptr;
                 left = new ast_binary_operation_node(std::move(left), operator_token.M_type, std::move(right));
             }
             return left;
