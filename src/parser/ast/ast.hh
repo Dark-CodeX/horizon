@@ -205,7 +205,7 @@ namespace horizon
 
             inline void print() const override
             {
-                std::cout << "VAR_DECL TYPE: " << RED_FG << M_type.c_str() << RESET_COLOR "(\n";
+                std::cout << "VAR_DECL TYPE: " << RED_FG << this->M_type.c_str() << RESET_COLOR "(\n";
                 for (const horizon_deps::pair<horizon_deps::string, horizon_deps::sptr<ast_node>> &i : this->M_variables)
                 {
                     std::cout << "\tNAME: " << PURPLE_FG << (i.get_first().c_str() == nullptr ? "(null)" : i.get_first().c_str()) << RESET_COLOR "    VALUE: ";
@@ -389,6 +389,61 @@ namespace horizon
                     std::cout << ENCLOSE(RED_FG, "CONDITION") << "\n";
                     this->M_condition->print();
                 }
+                std::cout << ")\n";
+            }
+        };
+
+        class ast_parameter_node : public ast_node
+        {
+            horizon_deps::vector<horizon_deps::pair<horizon_deps::string, horizon_deps::vector<horizon_deps::pair<horizon_deps::string, horizon_deps::sptr<ast_node>>>>> M_parameters;
+
+          public:
+            inline ast_parameter_node(horizon_deps::vector<horizon_deps::pair<horizon_deps::string, horizon_deps::vector<horizon_deps::pair<horizon_deps::string, horizon_deps::sptr<ast_node>>>>> &&params)
+                : M_parameters(std::move(params)) {}
+
+            inline void print() const override
+            {
+                std::cout << "(\n";
+                for (std::size_t i = 0; i < this->M_parameters.length(); i++)
+                {
+                    if (this->M_parameters[i])
+                    {
+                        std::cout << YELLOW_FG << i << RESET_COLOR << "\tTYPE: " RED_FG << this->M_parameters[i].get_first().c_str() << RESET_COLOR "( ";
+                        for (const auto &j : this->M_parameters[i].get_second())
+                        {
+                            std::cout << "NAME: " << PURPLE_FG << j.get_first().c_str() << RESET_COLOR " VALUE: ";
+                            if (j.raw_second())
+                            {
+                                j.get_second()->print();
+                                std::cout << ", ";
+                            }
+                        }
+                        std::cout << ")\n";
+                    }
+                }
+                std::cout << ")\n";
+            }
+        };
+
+        class ast_function_declaration_node : public ast_node
+        {
+            horizon_deps::string M_identifier;
+            horizon_deps::sptr<ast_node> M_parameters;
+            horizon_deps::string M_return_type;
+            horizon_deps::sptr<ast_node> M_block;
+
+          public:
+            inline ast_function_declaration_node(horizon_deps::string &&identifier, horizon_deps::sptr<ast_node> &&var_decl, horizon_deps::string &&return_type, horizon_deps::sptr<ast_node> &&block)
+                : M_identifier(std::move(identifier)), M_parameters(std::move(var_decl)), M_return_type(std::move(return_type)), M_block(std::move(block)) {}
+
+            inline void print() const override
+            {
+                std::cout << "FUNC_DECL NAME: " << PURPLE_FG << this->M_identifier.c_str() << RESET_COLOR "(\nPARAMETERS:\n";
+                if (this->M_parameters)
+                    this->M_parameters->print();
+                std::cout << "RETURN TYPE: " << RED_FG << this->M_return_type.c_str() << RESET_COLOR "\n";
+                if (this->M_block)
+                    this->M_block->print();
                 std::cout << ")\n";
             }
         };
