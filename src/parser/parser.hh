@@ -49,6 +49,7 @@ namespace horizon
 
             [[nodiscard]] horizon_deps::sptr<ast_node> parse_operators();
             [[nodiscard]] horizon_deps::sptr<ast_node> parse_assignment_operator();
+            [[nodiscard]] horizon_deps::sptr<ast_node> parse_ternary_operator();
             [[nodiscard]] horizon_deps::sptr<ast_node> parse_logical_or();
             [[nodiscard]] horizon_deps::sptr<ast_node> parse_logical_and();
             [[nodiscard]] horizon_deps::sptr<ast_node> parse_bitwise_or();
