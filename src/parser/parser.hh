@@ -38,6 +38,8 @@ namespace horizon
             [[nodiscard]] bool handle_semicolon();
             void handle_eof();
 
+            [[nodiscard]] horizon_deps::sptr<ast_node> parse_parameters();
+            [[nodiscard]] horizon_deps::sptr<ast_node> parse_function();
             [[nodiscard]] horizon_deps::sptr<ast_node> parse_do_while_loop();
             [[nodiscard]] horizon_deps::sptr<ast_node> parse_while_loop();
             [[nodiscard]] horizon_deps::sptr<ast_node> parse_for_loop();
