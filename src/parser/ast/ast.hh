@@ -209,10 +209,10 @@ namespace horizon
                 std::cout << "TERNARY: CONDITION: ";
                 if (this->M_condition)
                     this->M_condition->print();
-                std::cout << "VALUE_IF_TRUE: ";
+                std::cout << " VALUE_IF_TRUE: ";
                 if (this->M_val_if_true)
                     this->M_val_if_true->print();
-                std::cout << "VALUE_IF_FALSE: ";
+                std::cout << " VALUE_IF_FALSE: ";
                 if (this->M_val_if_false)
                     this->M_val_if_false->print();
                 std::cout << "\n";
@@ -434,16 +434,18 @@ namespace horizon
                     if (this->M_parameters[i])
                     {
                         std::cout << YELLOW_FG << i << RESET_COLOR << "\tTYPE: " RED_FG << this->M_parameters[i].get_first().c_str() << RESET_COLOR "( ";
-                        for (const auto &j : this->M_parameters[i].get_second())
+                        for (std::size_t j = 0; j < this->M_parameters[i].get_second().length(); j++)
                         {
-                            std::cout << "NAME: " << PURPLE_FG << j.get_first().c_str() << RESET_COLOR " VALUE: ";
-                            if (j.raw_second())
+                            std::cout << "NAME: " << PURPLE_FG << this->M_parameters[i].get_second()[j].get_first().c_str() << RESET_COLOR " VALUE: ";
+                            if (this->M_parameters[i].get_second()[j].raw_second())
                             {
-                                j.get_second()->print();
-                                std::cout << ", ";
+                                this->M_parameters[i].get_second()[j].get_second()->print();
+                                std::cout << (j < this->M_parameters[i].get_second().length() - 1 ? ", " : "");
                             }
+                            else
+                                std::cout << "(null)" << (j < this->M_parameters[i].get_second().length() - 1 ? ", " : "");
                         }
-                        std::cout << ")\n";
+                        std::cout << " )\n";
                     }
                 }
                 std::cout << ")\n";
