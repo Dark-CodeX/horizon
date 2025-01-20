@@ -281,7 +281,15 @@ namespace horizon
                     break;
                 case ':':
                     this->pre_advance_lexer();
-                    this->append_token(token_type::TOKEN_COLON);
+                    if (this->M_ch == ':')
+                    {
+                        this->pre_advance_lexer();
+                        this->append_token(token_type::TOKEN_MEMEBER_ACCESS);
+                    }
+                    else
+                    {
+                        this->append_token(token_type::TOKEN_COLON);
+                    }
                     break;
                 case ',':
                     this->pre_advance_lexer();
@@ -799,6 +807,7 @@ namespace horizon
                     "TOKEN_QUESTION",
                     "TOKEN_SEMICOLON",
                     "TOKEN_COLON",
+                    "TOKEN_MEMEBER_ACCESS",
                     "TOKEN_COMMA",
                     "TOKEN_DOT",
                     "TOKEN_RIGHT_PAREN",

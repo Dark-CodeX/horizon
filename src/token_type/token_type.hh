@@ -54,6 +54,7 @@ namespace horizon
         TOKEN_QUESTION,                            // Represents the ternary conditional operator (?)
         TOKEN_SEMICOLON,                           // Represents semicolon (;)
         TOKEN_COLON,                               // Represents colon (:)
+        TOKEN_MEMEBER_ACCESS,                      // Represents double-colon (:)
         TOKEN_COMMA,                               // Represents comma (,)
         TOKEN_DOT,                                 // Represents dot (.)
         TOKEN_RIGHT_PAREN,                         // Represents right parenthesis )
