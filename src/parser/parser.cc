@@ -849,7 +849,8 @@ namespace horizon
             horizon_deps::sptr<ast_node> left = this->parse_identifier();
             if (!left)
                 return nullptr;
-            while (this->get_token().M_type == token_type::TOKEN_DOT)
+            while (this->get_token().M_type == token_type::TOKEN_DOT ||
+                   this->get_token().M_type == token_type::TOKEN_MEMEBER_ACCESS)
             {
                 const token &operator_token = this->post_advance();
                 horizon_deps::sptr<ast_node> right = this->parse_identifier();
