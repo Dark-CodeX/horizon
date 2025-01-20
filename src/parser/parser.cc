@@ -94,11 +94,23 @@ namespace horizon
                                     return nullptr;
                                 if (this->get_token().M_type == token_type::TOKEN_COMMA)
                                     this->post_advance();
+                                else if (this->get_token().M_type != token_type::TOKEN_RIGHT_PAREN)
+                                {
+                                    this->handle_eof();
+                                    horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"unexpected token", this->get_token().M_lexeme.wrap("'"), "expected ')'"});
+                                    return nullptr;
+                                }
                             }
                             else if (this->get_token().M_type == token_type::TOKEN_COMMA)
                             {
                                 this->post_advance();
                                 temp_pair2.raw_second() = nullptr;
+                            }
+                            else if (this->get_token().M_type != token_type::TOKEN_RIGHT_PAREN)
+                            {
+                                this->handle_eof();
+                                horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"unexpected token", this->get_token().M_lexeme.wrap("'"), "expected ')'"});
+                                return nullptr;
                             }
                             temp_vec.add(std::move(temp_pair2));
                         }
@@ -540,11 +552,23 @@ namespace horizon
                             return nullptr;
                         if (this->get_token().M_type == token_type::TOKEN_COMMA)
                             this->post_advance();
+                        else if (this->get_token().M_type != token_type::TOKEN_SEMICOLON)
+                        {
+                            this->handle_eof();
+                            horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"unexpected token", this->get_token().M_lexeme.wrap("'"), "expected ';'"});
+                            return nullptr;
+                        }
                     }
                     else if (this->get_token().M_type == token_type::TOKEN_COMMA)
                     {
                         this->post_advance();
                         pair.raw_second() = nullptr;
+                    }
+                    else if (this->get_token().M_type != token_type::TOKEN_SEMICOLON)
+                    {
+                        this->handle_eof();
+                        horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"unexpected token", this->get_token().M_lexeme.wrap("'"), "expected ';'"});
+                        return nullptr;
                     }
                     vec.add(std::move(pair));
                 }
@@ -853,6 +877,14 @@ namespace horizon
                         vec.add(std::move(temp));
                         if (this->get_token().M_type == token_type::TOKEN_COMMA)
                             this->post_advance();
+                        else if (this->get_token().M_type == token_type::TOKEN_RIGHT_PAREN)
+                            break;
+                        else
+                        {
+                            this->handle_eof();
+                            horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"unexpected token", this->get_token().M_lexeme.wrap("'"), "expected ')'"});
+                            return nullptr;
+                        }
                     }
                     if (this->get_token().M_type == token_type::TOKEN_RIGHT_PAREN)
                         this->post_advance();
