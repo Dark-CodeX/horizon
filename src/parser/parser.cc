@@ -51,73 +51,116 @@ namespace horizon
                 this->M_current_parser--;
         }
 
+        horizon_deps::sptr<ast_node> parser::parse_data_type()
+        {
+            horizon_deps::vector<horizon_deps::string> type_qualifiers;
+            horizon_deps::sptr<ast_node> _type = nullptr;
+
+            if (this->get_token().M_type == token_type::TOKEN_KEYWORD)
+            {
+                while (this->get_token().M_lexeme == "const" || this->get_token().M_lexeme == "ref")
+                {
+                    type_qualifiers.add(this->post_advance().M_lexeme);
+                }
+                type_qualifiers.shrink_to_fit();
+            }
+            if (this->get_token().M_type == token_type::TOKEN_IDENTIFIER)
+            {
+                _type = this->parse_member_access();
+                if (!_type)
+                    return nullptr;
+            }
+            else if (this->get_token().M_type == token_type::TOKEN_PRIMARY_TYPE || this->get_token().M_lexeme == "let")
+            {
+                _type = new ast_operand_node(this->post_advance().M_lexeme);
+            }
+            else
+            {
+                this->handle_eof();
+                horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"expected an identifier, but got", this->get_token().M_lexeme.wrap("'")});
+                return nullptr;
+            }
+            return new ast_data_type_node(std::move(type_qualifiers), std::move(_type));
+        }
+
         horizon_deps::sptr<ast_node> parser::parse_parameters()
         {
-            horizon_deps::vector<horizon_deps::pair<horizon_deps::string, horizon_deps::vector<horizon_deps::pair<horizon_deps::string, horizon_deps::sptr<ast_node>>>>> params;
+            horizon_deps::vector<horizon_deps::pair<horizon_deps::sptr<ast_node>, horizon_deps::vector<horizon_deps::pair<horizon_deps::string, horizon_deps::sptr<ast_node>>>>> params;
             while (this->get_token().M_type != token_type::TOKEN_RIGHT_PAREN && !this->has_reached_end())
             {
-                horizon_deps::pair<horizon_deps::string, horizon_deps::vector<horizon_deps::pair<horizon_deps::string, horizon_deps::sptr<ast_node>>>> temp_pair1;
-                if (this->get_token().M_type == token_type::TOKEN_PRIMARY_TYPE || this->get_token().M_type == token_type::TOKEN_IDENTIFIER)
+                horizon_deps::pair<horizon_deps::sptr<ast_node>, horizon_deps::vector<horizon_deps::pair<horizon_deps::string, horizon_deps::sptr<ast_node>>>> temp_pair1;
+                temp_pair1.raw_first() = new horizon_deps::sptr<ast_node>(this->parse_data_type());
+                if (!(*temp_pair1.raw_first()))
+                    return nullptr;
+                if (this->get_token().M_type != token_type::TOKEN_COLON)
                 {
-                    horizon_deps::string type_iden = this->post_advance().M_lexeme;
-                    if (this->get_token().M_type == token_type::TOKEN_COLON)
-                    {
-                        // it is a data type
-                        temp_pair1.raw_first() = new horizon_deps::string(type_iden); // data type
-                        horizon_deps::vector<horizon_deps::pair<horizon_deps::string, horizon_deps::sptr<ast_node>>> temp_vec;
-                        this->post_advance();
-                        while (this->get_token().M_type != token_type::TOKEN_COMMA && this->get_token().M_type != token_type::TOKEN_RIGHT_PAREN && !this->has_reached_end())
-                        {
-                            horizon_deps::pair<horizon_deps::string, horizon_deps::sptr<ast_node>> temp_pair2;
-                            if ((this->get_token().M_type == token_type::TOKEN_PRIMARY_TYPE || this->get_token().M_type == token_type::TOKEN_KEYWORD) && this->M_tokens[this->M_current_parser + 1].M_type == token_type::TOKEN_COLON)
-                                break;
-                            else if (this->get_token().M_type == token_type::TOKEN_PRIMARY_TYPE || this->get_token().M_type == token_type::TOKEN_KEYWORD)
-                            {
-                                this->handle_eof();
-                                horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"reserved word", this->get_token().M_lexeme.wrap("'"), "cannot be used as an identifier"});
-                                return nullptr;
-                            }
-                            else if (this->get_token().M_type == token_type::TOKEN_IDENTIFIER)
-                                temp_pair2.raw_first() = new horizon_deps::string(this->get_token().M_lexeme);
-                            else
-                            {
-                                this->handle_eof();
-                                horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"expected an identifier, but got", this->get_token().M_lexeme.wrap("'")});
-                                return nullptr;
-                            }
-                            this->post_advance();
-                            if (this->get_token().M_type == token_type::TOKEN_ASSIGN)
-                            {
-                                this->post_advance();
-                                temp_pair2.raw_second() = new horizon_deps::sptr<ast_node>(this->parse_operators());
-                                if (!(*temp_pair2.raw_second()))
-                                    return nullptr;
-                                if (this->get_token().M_type == token_type::TOKEN_COMMA)
-                                    this->post_advance();
-                                else if (this->get_token().M_type != token_type::TOKEN_RIGHT_PAREN)
-                                {
-                                    this->handle_eof();
-                                    horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"unexpected token", this->get_token().M_lexeme.wrap("'"), "expected ')'"});
-                                    return nullptr;
-                                }
-                            }
-                            else if (this->get_token().M_type == token_type::TOKEN_COMMA)
-                            {
-                                this->post_advance();
-                                temp_pair2.raw_second() = nullptr;
-                            }
-                            else if (this->get_token().M_type != token_type::TOKEN_RIGHT_PAREN)
-                            {
-                                this->handle_eof();
-                                horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"unexpected token", this->get_token().M_lexeme.wrap("'"), "expected ')'"});
-                                return nullptr;
-                            }
-                            temp_vec.add(std::move(temp_pair2));
-                        }
-                        temp_vec.shrink_to_fit();
-                        temp_pair1.raw_second() = new horizon_deps::vector<horizon_deps::pair<horizon_deps::string, horizon_deps::sptr<ast_node>>>(std::move(temp_vec));
-                    }
+                    this->handle_eof();
+                    horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"expected ':', but got", this->get_token().M_lexeme.wrap("'")});
+                    return nullptr;
                 }
+                this->post_advance();
+                horizon_deps::vector<horizon_deps::pair<horizon_deps::string, horizon_deps::sptr<ast_node>>> temp_vec;
+                while (this->get_token().M_type != token_type::TOKEN_COMMA && this->get_token().M_type != token_type::TOKEN_RIGHT_PAREN && !this->has_reached_end())
+                {
+                    horizon_deps::pair<horizon_deps::string, horizon_deps::sptr<ast_node>> temp_pair2;
+                    std::size_t temp_curr_parser = this->M_current_parser;
+                    bool is_data_type = false;
+                    while (this->get_token().M_type != token_type::TOKEN_COMMA && this->get_token().M_type != token_type::TOKEN_RIGHT_PAREN && !this->has_reached_end())
+                    {
+                        if (this->post_advance().M_type == token_type::TOKEN_COLON)
+                        {
+                            is_data_type = true;
+                            break;
+                        }
+                    }
+                    this->M_current_parser = temp_curr_parser;
+                    if (is_data_type)
+                        break;
+                    if (this->get_token().M_type == token_type::TOKEN_PRIMARY_TYPE || this->get_token().M_type == token_type::TOKEN_KEYWORD)
+                    {
+                        this->handle_eof();
+                        horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"reserved word", this->get_token().M_lexeme.wrap("'"), "cannot be used as an identifier"});
+                        return nullptr;
+                    }
+                    else if (this->get_token().M_type == token_type::TOKEN_IDENTIFIER)
+                        temp_pair2.raw_first() = new horizon_deps::string(this->get_token().M_lexeme);
+                    else
+                    {
+                        this->handle_eof();
+                        horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"expected an identifier, but got", this->get_token().M_lexeme.wrap("'")});
+                        return nullptr;
+                    }
+                    this->post_advance();
+                    if (this->get_token().M_type == token_type::TOKEN_ASSIGN)
+                    {
+                        this->post_advance();
+                        temp_pair2.raw_second() = new horizon_deps::sptr<ast_node>(this->parse_operators());
+                        if (!(*temp_pair2.raw_second()))
+                            return nullptr;
+                        if (this->get_token().M_type == token_type::TOKEN_COMMA)
+                            this->post_advance();
+                        else if (this->get_token().M_type != token_type::TOKEN_RIGHT_PAREN)
+                        {
+                            this->handle_eof();
+                            horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"unexpected token", this->get_token().M_lexeme.wrap("'"), "expected ')'"});
+                            return nullptr;
+                        }
+                    }
+                    else if (this->get_token().M_type == token_type::TOKEN_COMMA)
+                    {
+                        this->post_advance();
+                        temp_pair2.raw_second() = nullptr;
+                    }
+                    else if (this->get_token().M_type != token_type::TOKEN_RIGHT_PAREN)
+                    {
+                        this->handle_eof();
+                        horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"unexpected token", this->get_token().M_lexeme.wrap("'"), "expected ')'"});
+                        return nullptr;
+                    }
+                    temp_vec.add(std::move(temp_pair2));
+                }
+                temp_vec.shrink_to_fit();
+                temp_pair1.raw_second() = new horizon_deps::vector<horizon_deps::pair<horizon_deps::string, horizon_deps::sptr<ast_node>>>(std::move(temp_vec));
                 params.add(std::move(temp_pair1));
             }
             params.shrink_to_fit();
@@ -134,7 +177,7 @@ namespace horizon
             }
             horizon_deps::string identifier = nullptr;
             horizon_deps::sptr<ast_node> parameters = nullptr;
-            horizon_deps::string return_type = nullptr;
+            horizon_deps::sptr<ast_node> return_type = nullptr;
             horizon_deps::sptr<ast_node> block = nullptr;
 
             this->post_advance();
@@ -179,10 +222,9 @@ namespace horizon
                 return nullptr;
             }
             this->post_advance();
-            if (this->get_token().M_type == token_type::TOKEN_IDENTIFIER || this->get_token().M_type == token_type::TOKEN_PRIMARY_TYPE)
-            {
-                return_type = this->post_advance().M_lexeme;
-            }
+            return_type = this->parse_data_type();
+            if (!return_type)
+                return nullptr;
             if (this->get_token().M_type != token_type::TOKEN_LEFT_BRACE)
             {
                 this->handle_eof();
@@ -451,48 +493,54 @@ namespace horizon
                             return nullptr;
                         nodes.add(std::move(temp));
                     }
-                    else if (this->get_token().M_type == token_type::TOKEN_KEYWORD)
+                    else
                     {
-                        horizon_deps::sptr<ast_node> temp = nullptr;
-                        if (this->get_token().M_lexeme == "if" || this->get_token().M_lexeme == "elif" || this->get_token().M_lexeme == "else")
-                            temp = this->parse_if_elif_else();
-                        else if (this->get_token().M_lexeme == "for")
-                            temp = this->parse_for_loop();
-                        else if (this->get_token().M_lexeme == "while")
-                            temp = this->parse_while_loop();
-                        else if (this->get_token().M_lexeme == "do")
-                            temp = this->parse_do_while_loop();
-                        if (!temp)
-                            return nullptr;
-                        nodes.add(std::move(temp));
-                    }
-                    else if (this->get_token().M_type == token_type::TOKEN_IDENTIFIER && (this->M_tokens[this->M_current_parser + 1].M_type != token_type::TOKEN_COLON || this->M_tokens[this->M_current_parser + 1].M_type == token_type::TOKEN_LEFT_PAREN))
-                    {
-                        // expr, function calls, statements
-                        horizon_deps::sptr<ast_node> x1 = nullptr;
-                        do
+                        bool is_var_decl = false;
+                        std::size_t temp_curr_parser = this->M_current_parser;
+                        while (this->get_token().M_type != token_type::TOKEN_SEMICOLON && !this->has_reached_end())
                         {
-                            x1 = this->parse_operators();
+                            if (this->post_advance().M_type == token_type::TOKEN_COLON)
+                            {
+                                is_var_decl = true;
+                                break;
+                            }
+                        }
+                        this->M_current_parser = temp_curr_parser;
+                        if (is_var_decl)
+                        {
+                            horizon_deps::sptr<ast_node> x1 = this->parse_variable_decl();
                             if (!x1)
                                 return nullptr;
                             if (!this->handle_semicolon())
                                 return nullptr;
                             nodes.add(std::move(x1));
-                        } while (x1);
-                    }
-                    else
-                    {
-                        // var decl
-                        horizon_deps::sptr<ast_node> x2 = nullptr;
-                        do
+                        }
+                        else if (this->get_token().M_type == token_type::TOKEN_KEYWORD)
                         {
-                            x2 = this->parse_variable_decl();
-                            if (!x2)
+                            horizon_deps::sptr<ast_node> temp = nullptr;
+                            if (this->get_token().M_lexeme == "if" || this->get_token().M_lexeme == "elif" || this->get_token().M_lexeme == "else")
+                                temp = this->parse_if_elif_else();
+                            else if (this->get_token().M_lexeme == "for")
+                                temp = this->parse_for_loop();
+                            else if (this->get_token().M_lexeme == "while")
+                                temp = this->parse_while_loop();
+                            else if (this->get_token().M_lexeme == "do")
+                                temp = this->parse_do_while_loop();
+                            else if (this->get_token().M_lexeme == "func")
+                                temp = this->parse_function();
+                            if (!temp)
+                                return nullptr;
+                            nodes.add(std::move(temp));
+                        }
+                        else
+                        {
+                            horizon_deps::sptr<ast_node> x1 = this->parse_operators();
+                            if (!x1)
                                 return nullptr;
                             if (!this->handle_semicolon())
                                 return nullptr;
-                            nodes.add(std::move(x2));
-                        } while (x2 && (this->get_token().M_type == token_type::TOKEN_PRIMARY_TYPE || this->get_token().M_type == token_type::TOKEN_IDENTIFIER) && this->M_tokens[this->M_current_parser + 1].M_type == token_type::TOKEN_COLON);
+                            nodes.add(std::move(x1));
+                        }
                     }
                 }
                 if (this->get_token().M_type != token_type::TOKEN_RIGHT_BRACE)
@@ -511,71 +559,69 @@ namespace horizon
 
         horizon_deps::sptr<ast_node> parser::parse_variable_decl()
         {
-            if (this->get_token().M_type == token_type::TOKEN_PRIMARY_TYPE || this->get_token().M_type == token_type::TOKEN_IDENTIFIER)
+            horizon_deps::sptr<ast_node> type_ = this->parse_data_type();
+            if (!type_)
+                return nullptr;
+            horizon_deps::vector<horizon_deps::pair<horizon_deps::string, horizon_deps::sptr<ast_node>>> vec(5);
+            if (this->get_token().M_type != token_type::TOKEN_COLON)
             {
-                horizon_deps::vector<horizon_deps::pair<horizon_deps::string, horizon_deps::sptr<ast_node>>> vec(5);
-                horizon_deps::string &type = this->M_tokens[this->M_current_parser++].M_lexeme;
-                if (this->get_token().M_type != token_type::TOKEN_COLON)
+                this->handle_eof();
+                horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"expected ':' after the data type, but got", this->get_token().M_lexeme.wrap("'")});
+                return nullptr;
+            }
+            this->post_advance();
+            while (this->get_token().M_type != token_type::TOKEN_SEMICOLON && !this->has_reached_end())
+            {
+                horizon_deps::pair<horizon_deps::string, horizon_deps::sptr<ast_node>> pair;
+                if (this->get_token().M_type == token_type::TOKEN_PRIMARY_TYPE || this->get_token().M_type == token_type::TOKEN_KEYWORD)
                 {
                     this->handle_eof();
-                    horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"expected ':' after data type", type.wrap("'")});
+                    horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"reserved word", this->get_token().M_lexeme.wrap("'"), "cannot be used as an identifier"});
+                    return nullptr;
+                }
+                else if (this->get_token().M_type == token_type::TOKEN_IDENTIFIER)
+                {
+                    pair.raw_first() = new horizon_deps::string(this->get_token().M_lexeme);
+                    if ((*pair.raw_first()).is_null())
+                        return nullptr;
+                }
+                else
+                {
+                    this->handle_eof();
+                    horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"expected an identifier, but got", this->get_token().M_lexeme.wrap("'")});
                     return nullptr;
                 }
                 this->post_advance();
-                while (this->get_token().M_type != token_type::TOKEN_SEMICOLON && !this->has_reached_end())
+                if (this->get_token().M_type == token_type::TOKEN_ASSIGN)
                 {
-                    horizon_deps::pair<horizon_deps::string, horizon_deps::sptr<ast_node>> pair;
-                    if (this->get_token().M_type == token_type::TOKEN_PRIMARY_TYPE || this->get_token().M_type == token_type::TOKEN_KEYWORD)
-                    {
-                        this->handle_eof();
-                        horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"reserved word", this->get_token().M_lexeme.wrap("'"), "cannot be used as an identifier"});
-                        return nullptr;
-                    }
-                    else if (this->get_token().M_type == token_type::TOKEN_IDENTIFIER)
-                    {
-                        pair.raw_first() = new horizon_deps::string(this->get_token().M_lexeme);
-                        if ((*pair.raw_first()).is_null())
-                            return nullptr;
-                    }
-                    else
-                    {
-                        this->handle_eof();
-                        horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"expected an identifier, but got", this->get_token().M_lexeme.wrap("'")});
-                        return nullptr;
-                    }
                     this->post_advance();
-                    if (this->get_token().M_type == token_type::TOKEN_ASSIGN)
-                    {
+                    pair.raw_second() = new horizon_deps::sptr<ast_node>(this->parse_operators());
+                    if (!(*pair.raw_second()))
+                        return nullptr;
+                    if (this->get_token().M_type == token_type::TOKEN_COMMA)
                         this->post_advance();
-                        pair.raw_second() = new horizon_deps::sptr<ast_node>(this->parse_operators());
-                        if (!(*pair.raw_second()))
-                            return nullptr;
-                        if (this->get_token().M_type == token_type::TOKEN_COMMA)
-                            this->post_advance();
-                        else if (this->get_token().M_type != token_type::TOKEN_SEMICOLON)
-                        {
-                            this->handle_eof();
-                            horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"unexpected token", this->get_token().M_lexeme.wrap("'"), "expected ';'"});
-                            return nullptr;
-                        }
-                    }
-                    else if (this->get_token().M_type == token_type::TOKEN_COMMA)
-                    {
-                        this->post_advance();
-                        pair.raw_second() = nullptr;
-                    }
                     else if (this->get_token().M_type != token_type::TOKEN_SEMICOLON)
                     {
                         this->handle_eof();
                         horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"unexpected token", this->get_token().M_lexeme.wrap("'"), "expected ';'"});
                         return nullptr;
                     }
-                    vec.add(std::move(pair));
                 }
-                vec.shrink_to_fit();
-                return new ast_variable_declaration_node(std::move(type), std::move(vec));
+                else if (this->get_token().M_type == token_type::TOKEN_COMMA)
+                {
+                    this->post_advance();
+                    pair.raw_second() = nullptr;
+                }
+                else if (this->get_token().M_type != token_type::TOKEN_SEMICOLON)
+                {
+                    this->handle_eof();
+                    horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"unexpected token", this->get_token().M_lexeme.wrap("'"), "expected ';'"});
+                    return nullptr;
+                }
+                vec.add(std::move(pair));
             }
-            return nullptr;
+            vec.shrink_to_fit();
+            return new ast_variable_declaration_node(std::move(type_), std::move(vec));
         }
 
         horizon_deps::sptr<ast_node> parser::parse_operators()
@@ -905,8 +951,25 @@ namespace horizon
                 else
                     return new ast_operand_node(std::move(identifier));
             }
-            else
-                return this->parse_brackets();
+            else if (this->get_token().M_type == token_type::TOKEN_KEYWORD)
+            {
+                if (this->get_token().M_lexeme == "true")
+                {
+                    this->post_advance();
+                    return new ast_operand_node(true);
+                }
+                else if (this->get_token().M_lexeme == "false")
+                {
+                    this->post_advance();
+                    return new ast_operand_node(false);
+                }
+                else if (this->get_token().M_lexeme == "null")
+                {
+                    this->post_advance();
+                    return new ast_operand_node<void *>(nullptr);
+                }
+            }
+            return this->parse_brackets();
         }
 
         horizon_deps::sptr<ast_node> parser::parse_brackets()
