@@ -4,6 +4,8 @@
  * @author Tushar Chaurasia (Dark-CodeX)
  */
 
+#include <ctime>
+
 #include "../lexer/lexer.hh"
 #include "../parser/parser.hh"
 #include "../misc/load_file.hh"
@@ -30,11 +32,14 @@ int main(int argc, char **argv)
         return EXIT_FAILURE;
     }
 
+    time_t start = clock();
+
     horizon::horizon_deps::sptr<horizon::horizon_lexer::lexer> lexer(file.raw());
     if (!lexer->init_lexing())
     {
         return EXIT_FAILURE;
     }
+    time_t end_lexer = clock();
 
     horizon::horizon_deps::sptr<horizon::horizon_parser::parser> parser({std::move(lexer->move()), file.raw()});
 
@@ -42,6 +47,9 @@ int main(int argc, char **argv)
     {
         return EXIT_FAILURE;
     }
+    time_t end_parser = clock();
+
+    printf("LEXER TIME: " ENCLOSE(GREEN_FG, "%lf") " sec\nPARSER TIME: " ENCLOSE(GREEN_FG, "%lf") " sec\n", double(end_lexer - start) / CLOCKS_PER_SEC, double(end_parser - end_lexer) / CLOCKS_PER_SEC);
 
     return EXIT_SUCCESS;
 }
