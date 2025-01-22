@@ -876,18 +876,49 @@ namespace horizon
 
         horizon_deps::sptr<ast_node> parser::parse_exponent()
         {
-            horizon_deps::sptr<ast_node> left = this->parse_member_access();
+            horizon_deps::sptr<ast_node> left = this->parse_unary_operators();
             if (!left)
                 return nullptr;
             while (this->get_token().M_type == token_type::TOKEN_ARITHMETIC_POWER)
             {
                 const token &operator_token = this->post_advance();
-                horizon_deps::sptr<ast_node> right = this->parse_member_access();
+                horizon_deps::sptr<ast_node> right = this->parse_unary_operators();
                 if (!right)
                     return nullptr;
                 left = new ast_binary_operation_node(std::move(left), operator_token.M_type, std::move(right));
             }
             return left;
+        }
+
+        horizon_deps::sptr<ast_node> parser::parse_unary_operators()
+        {
+            token_type current_type = this->get_token().M_type;
+            if (current_type == token_type::TOKEN_INCREMENT ||
+                current_type == token_type::TOKEN_DECREMENT ||
+                current_type == token_type::TOKEN_ARITHMETIC_ADD ||
+                current_type == token_type::TOKEN_ARITHMETIC_SUBSTRACT ||
+                current_type == token_type::TOKEN_LOGICAL_NOT ||
+                current_type == token_type::TOKEN_BITWISE_NOT)
+            {
+                const token &operator_token = this->post_advance();
+                horizon_deps::sptr<ast_node> operand = this->parse_unary_operators();
+                if (!operand)
+                    return nullptr;
+                return new ast_unary_operation_node(std::move(operand), operator_token.M_type, true);
+            }
+            else
+            {
+                horizon_deps::sptr<ast_node> left = this->parse_member_access();
+                if (!left)
+                    return nullptr;
+                while (this->get_token().M_type == token_type::TOKEN_INCREMENT ||
+                       this->get_token().M_type == token_type::TOKEN_DECREMENT)
+                {
+                    const token &operator_token = this->post_advance();
+                    left = new ast_unary_operation_node(std::move(left), operator_token.M_type, false);
+                }
+                return left;
+            }
         }
 
         horizon_deps::sptr<ast_node> parser::parse_member_access()
@@ -943,10 +974,6 @@ namespace horizon
                     }
                     vec.shrink_to_fit();
                     return new ast_function_call_node(std::move(identifier), std::move(vec));
-                }
-                else if (this->get_token().M_type == token_type::TOKEN_INCREMENT || this->get_token().M_type == token_type::TOKEN_DECREMENT)
-                {
-                    return new ast_post_unary_operation_node(std::move(identifier), this->post_advance().M_type);
                 }
                 else
                     return new ast_operand_node(std::move(identifier));
