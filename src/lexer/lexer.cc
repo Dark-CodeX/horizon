@@ -663,30 +663,6 @@ namespace horizon
             return horizon_errors::error_code::HORIZON_NO_ERROR;
         }
 
-        void lexer::handle_negative()
-        {
-            for (std::size_t i = 0; i < this->M_tokens.length(); i++)
-            {
-                if (this->M_tokens[i].M_type == token_type::TOKEN_ARITHMETIC_SUBSTRACT)
-                {
-                    bool merge_token = true;
-                    if (i != 0 && (this->M_tokens[i - 1].M_type == token_type::TOKEN_INTEGER_LITERAL || this->M_tokens[i - 1].M_type == token_type::TOKEN_DECIMAL_LITERAL || this->M_tokens[i - 1].M_type == token_type::TOKEN_IDENTIFIER || this->M_tokens[i - 1].M_type == token_type::TOKEN_RIGHT_PAREN))
-                        merge_token = false;
-                    if (merge_token)
-                    {
-                        i++;
-                        if (this->M_tokens[i].M_type == token_type::TOKEN_INTEGER_LITERAL)
-                            this->M_tokens[i - 1].M_type = token_type::TOKEN_INTEGER_LITERAL;
-                        else if (this->M_tokens[i].M_type == token_type::TOKEN_DECIMAL_LITERAL)
-                            this->M_tokens[i - 1].M_type = token_type::TOKEN_DECIMAL_LITERAL;
-                        this->M_tokens[i - 1].M_lexeme.append(this->M_tokens[i].M_lexeme);
-                        this->M_tokens[i - 1].M_end = this->M_tokens[i].M_end;
-                        this->M_tokens.remove(i);
-                    }
-                }
-            }
-        }
-
         std::size_t lexer::check_brackets() const
         {
             std::stack<std::pair<std::size_t, token_type>> s;
@@ -740,7 +716,6 @@ namespace horizon
                                                          this->M_tokens[invalid_bracket_pos].M_end, {"invalid or unexpected bracket", this->M_tokens[invalid_bracket_pos].M_lexeme});
                 return false;
             }
-            this->handle_negative();
             this->M_tokens.shrink_to_fit();
             return true;
         }

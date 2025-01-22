@@ -69,7 +69,6 @@ namespace horizon
             [[nodiscard]] horizon_errors::error_code handle_comments();
             [[nodiscard]] horizon_errors::error_code handle_char();
             [[nodiscard]] horizon_errors::error_code handle_string();
-            void handle_negative();
 
             [[nodiscard]] std::size_t check_brackets() const;
 
