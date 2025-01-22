@@ -237,6 +237,33 @@ namespace horizon
             return new ast_function_declaration_node(std::move(identifier), std::move(parameters), std::move(return_type), std::move(block));
         }
 
+        horizon_deps::sptr<ast_node> parser::parse_jump_statements()
+        {
+            horizon_deps::string keyword_;
+            horizon_deps::sptr<ast_node> expr = nullptr;
+            if (this->get_token().M_lexeme == "break" || this->get_token().M_lexeme == "continue")
+            {
+                keyword_ = this->post_advance().M_lexeme;
+                if (!this->handle_semicolon())
+                    return nullptr;
+            }
+            else if (this->get_token().M_lexeme == "return")
+            {
+                keyword_ = this->post_advance().M_lexeme;
+                if (this->get_token().M_type == token_type::TOKEN_SEMICOLON)
+                {
+                    this->post_advance();
+                }
+                else
+                {
+                    expr = this->parse_operators();
+                    if (!this->handle_semicolon())
+                        return nullptr;
+                }
+            }
+            return new ast_jump_statement_node(std::move(keyword_), std::move(expr));
+        }
+
         horizon_deps::sptr<ast_node> parser::parse_do_while_loop()
         {
             if (this->get_token().M_lexeme != "do")
@@ -506,19 +533,12 @@ namespace horizon
                             }
                         }
                         this->M_current_parser = temp_curr_parser;
-                        if (is_var_decl)
-                        {
-                            horizon_deps::sptr<ast_node> x1 = this->parse_variable_decl();
-                            if (!x1)
-                                return nullptr;
-                            if (!this->handle_semicolon())
-                                return nullptr;
-                            nodes.add(std::move(x1));
-                        }
-                        else if (this->get_token().M_type == token_type::TOKEN_KEYWORD)
+                        if (this->get_token().M_type == token_type::TOKEN_KEYWORD)
                         {
                             horizon_deps::sptr<ast_node> temp = nullptr;
-                            if (this->get_token().M_lexeme == "if" || this->get_token().M_lexeme == "elif" || this->get_token().M_lexeme == "else")
+                            if (this->get_token().M_lexeme == "if" ||
+                                this->get_token().M_lexeme == "elif" ||
+                                this->get_token().M_lexeme == "else")
                                 temp = this->parse_if_elif_else();
                             else if (this->get_token().M_lexeme == "for")
                                 temp = this->parse_for_loop();
@@ -528,9 +548,22 @@ namespace horizon
                                 temp = this->parse_do_while_loop();
                             else if (this->get_token().M_lexeme == "func")
                                 temp = this->parse_function();
+                            else if (this->get_token().M_lexeme == "return" ||
+                                     this->get_token().M_lexeme == "break" ||
+                                     this->get_token().M_lexeme == "continue")
+                                temp = this->parse_jump_statements();
                             if (!temp)
                                 return nullptr;
                             nodes.add(std::move(temp));
+                        }
+                        else if (is_var_decl)
+                        {
+                            horizon_deps::sptr<ast_node> x1 = this->parse_variable_decl();
+                            if (!x1)
+                                return nullptr;
+                            if (!this->handle_semicolon())
+                                return nullptr;
+                            nodes.add(std::move(x1));
                         }
                         else
                         {
