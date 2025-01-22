@@ -457,6 +457,23 @@ namespace horizon
             }
         };
 
+        class ast_jump_statement_node : public ast_node
+        {
+            horizon_deps::string M_keyword;
+            horizon_deps::sptr<ast_node> M_expression;
+
+          public:
+            inline ast_jump_statement_node(horizon_deps::string &&keyword__, horizon_deps::sptr<ast_node> &&expr)
+                : M_keyword(std::move(keyword__)), M_expression(std::move(expr)) {}
+
+            inline void print() const override
+            {
+                std::cout << RED_FG << this->M_keyword.c_str() << RESET_COLOR " ";
+                if (this->M_expression)
+                    this->M_expression->print();
+            }
+        };
+
         class ast_parameter_node : public ast_node
         {
             horizon_deps::vector<horizon_deps::pair<horizon_deps::sptr<ast_node>, horizon_deps::vector<horizon_deps::pair<horizon_deps::string, horizon_deps::sptr<ast_node>>>>> M_parameters;
