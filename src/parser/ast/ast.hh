@@ -44,14 +44,15 @@ namespace horizon
             }
         };
 
-        class ast_post_unary_operation_node : public ast_node
+        class ast_unary_operation_node : public ast_node
         {
-            horizon_deps::string M_identifier;
+            horizon_deps::sptr<ast_node> M_operand;
             token_type M_operator;
+            bool M_is_prefix;
 
           public:
-            inline ast_post_unary_operation_node(horizon_deps::string &&operand, token_type opr)
-                : M_identifier(std::move(operand)), M_operator(opr) {}
+            inline ast_unary_operation_node(horizon_deps::sptr<ast_node> &&operand, token_type opr, bool prefix)
+                : M_operand(std::move(operand)), M_operator(opr), M_is_prefix(prefix) {}
 
             inline void print() const override
             {
@@ -113,8 +114,18 @@ namespace horizon
                         "TOKEN_PRIMARY_TYPE",
                         "TOKEN_END_OF_FILE"};
                 printf("( ");
-                std::cout << PURPLE_FG << this->M_identifier.c_str() << RESET_COLOR;
-                std::cout << " " << BLUE_FG << to_str[(unsigned)this->M_operator] << RESET_COLOR " ";
+                if (this->M_is_prefix)
+                {
+                    std::cout << BLUE_FG << to_str[(unsigned)this->M_operator] << RESET_COLOR " ";
+                    if (this->M_operand)
+                        this->M_operand->print();
+                }
+                else
+                {
+                    if (this->M_operand)
+                        this->M_operand->print();
+                    std::cout << " " << BLUE_FG << to_str[(unsigned)this->M_operator] << RESET_COLOR;
+                }
                 printf(" )");
             }
         };
