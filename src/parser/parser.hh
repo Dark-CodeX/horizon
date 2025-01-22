@@ -62,6 +62,7 @@ namespace horizon
             [[nodiscard]] horizon_deps::sptr<ast_node> parse_expr();
             [[nodiscard]] horizon_deps::sptr<ast_node> parse_term();
             [[nodiscard]] horizon_deps::sptr<ast_node> parse_exponent();
+            [[nodiscard]] horizon_deps::sptr<ast_node> parse_unary_operators();
             [[nodiscard]] horizon_deps::sptr<ast_node> parse_member_access();
             [[nodiscard]] horizon_deps::sptr<ast_node> parse_identifier();
             [[nodiscard]] horizon_deps::sptr<ast_node> parse_brackets();
