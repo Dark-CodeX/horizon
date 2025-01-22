@@ -41,6 +41,7 @@ namespace horizon
             [[nodiscard]] horizon_deps::sptr<ast_node> parse_data_type();
             [[nodiscard]] horizon_deps::sptr<ast_node> parse_parameters();
             [[nodiscard]] horizon_deps::sptr<ast_node> parse_function();
+            [[nodiscard]] horizon_deps::sptr<ast_node> parse_jump_statements();
             [[nodiscard]] horizon_deps::sptr<ast_node> parse_do_while_loop();
             [[nodiscard]] horizon_deps::sptr<ast_node> parse_while_loop();
             [[nodiscard]] horizon_deps::sptr<ast_node> parse_for_loop();
