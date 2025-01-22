@@ -41,3 +41,7 @@ bin
 *.bin
 .history
 .cache
+
+#Clion
+.idea
+cmake-build-debug
