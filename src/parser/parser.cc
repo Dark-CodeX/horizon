@@ -58,7 +58,9 @@ namespace horizon
 
             if (this->get_token().M_type == token_type::TOKEN_KEYWORD)
             {
-                while (this->get_token().M_lexeme == "const" || this->get_token().M_lexeme == "ref")
+                while (this->get_token().M_lexeme == "const" ||
+                       this->get_token().M_lexeme == "ref" ||
+                       this->get_token().M_lexeme == "static")
                 {
                     type_qualifiers.add(this->post_advance().M_lexeme);
                 }
@@ -533,7 +535,11 @@ namespace horizon
                             }
                         }
                         this->M_current_parser = temp_curr_parser;
-                        if (this->get_token().M_type == token_type::TOKEN_KEYWORD)
+                        if (this->get_token().M_type == token_type::TOKEN_KEYWORD &&
+                            this->get_token().M_lexeme != "let" &&
+                            this->get_token().M_lexeme != "const" &&
+                            this->get_token().M_lexeme != "ref" &&
+                            this->get_token().M_lexeme != "static")
                         {
                             horizon_deps::sptr<ast_node> temp = nullptr;
                             if (this->get_token().M_lexeme == "if" ||
