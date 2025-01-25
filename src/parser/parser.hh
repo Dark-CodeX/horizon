@@ -31,9 +31,9 @@ namespace horizon
 
           private:
             [[nodiscard]] bool has_reached_end() const;
-            [[nodiscard]] const token &pre_advance();
-            const token &post_advance();
+            token &post_advance();
             [[nodiscard]] const token &get_token() const;
+            [[nodiscard]] token &get_token();
 
             [[nodiscard]] bool handle_semicolon();
             void handle_eof();

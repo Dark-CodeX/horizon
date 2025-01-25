@@ -47,76 +47,19 @@ namespace horizon
         class ast_unary_operation_node : public ast_node
         {
             horizon_deps::sptr<ast_node> M_operand;
-            token_type M_operator;
+            token M_operator;
             bool M_is_prefix;
 
           public:
-            inline ast_unary_operation_node(horizon_deps::sptr<ast_node> &&operand, token_type opr, bool prefix)
-                : M_operand(std::move(operand)), M_operator(opr), M_is_prefix(prefix) {}
+            inline ast_unary_operation_node(horizon_deps::sptr<ast_node> &&operand, token &&opr, bool prefix)
+                : M_operand(std::move(operand)), M_operator(std::move(opr)), M_is_prefix(prefix) {}
 
             inline void print() const override
             {
-                const char *to_str[] =
-                    {
-                        "TOKEN_IDENTIFIER",
-                        "TOKEN_CHAR_LITERAL",
-                        "TOKEN_STRING_LITERAL",
-                        "TOKEN_INTEGER_LITERAL",
-                        "TOKEN_DECIMAL_LITERAL",
-                        "+",
-                        "-",
-                        "*",
-                        "**",
-                        "/",
-                        "%",
-                        "==",
-                        "!=",
-                        ">",
-                        "<",
-                        ">=",
-                        "<=",
-                        "!",
-                        "&&",
-                        "||",
-                        "~",
-                        "&",
-                        "|",
-                        "^",
-                        "<<",
-                        ">>",
-                        "=",
-                        "+=",
-                        "-=",
-                        "*=",
-                        "**=",
-                        "/=",
-                        "%=",
-                        "&=",
-                        "|=",
-                        "^=",
-                        "<<=",
-                        ">>=",
-                        "++",
-                        "--",
-                        "?",
-                        ";",
-                        ":",
-                        "::",
-                        ",",
-                        ".",
-                        ")",
-                        "(",
-                        "}",
-                        "{",
-                        "]",
-                        "[",
-                        "TOKEN_KEYWORD",
-                        "TOKEN_PRIMARY_TYPE",
-                        "TOKEN_END_OF_FILE"};
                 printf("( ");
                 if (this->M_is_prefix)
                 {
-                    std::cout << BLUE_FG << to_str[(unsigned)this->M_operator] << RESET_COLOR " ";
+                    std::cout << BLUE_FG << this->M_operator.M_lexeme.c_str() << RESET_COLOR " ";
                     if (this->M_operand)
                         this->M_operand->print();
                 }
@@ -124,7 +67,7 @@ namespace horizon
                 {
                     if (this->M_operand)
                         this->M_operand->print();
-                    std::cout << " " << BLUE_FG << to_str[(unsigned)this->M_operator] << RESET_COLOR;
+                    std::cout << " " << BLUE_FG << this->M_operator.M_lexeme.c_str() << RESET_COLOR;
                 }
                 printf(" )");
             }
@@ -133,75 +76,18 @@ namespace horizon
         class ast_binary_operation_node : public ast_node
         {
             horizon_deps::sptr<ast_node> M_left;
-            token_type M_operator;
+            token M_operator;
             horizon_deps::sptr<ast_node> M_right;
 
           public:
-            inline ast_binary_operation_node(horizon_deps::sptr<ast_node> &&left, token_type opr, horizon_deps::sptr<ast_node> &&right)
-                : M_left(std::move(left)), M_operator(opr), M_right(std::move(right)) {}
+            inline ast_binary_operation_node(horizon_deps::sptr<ast_node> &&left, token &&opr, horizon_deps::sptr<ast_node> &&right)
+                : M_left(std::move(left)), M_operator(std::move(opr)), M_right(std::move(right)) {}
 
             inline void print() const override
             {
-                const char *to_str[] =
-                    {
-                        "TOKEN_IDENTIFIER",
-                        "TOKEN_CHAR_LITERAL",
-                        "TOKEN_STRING_LITERAL",
-                        "TOKEN_INTEGER_LITERAL",
-                        "TOKEN_DECIMAL_LITERAL",
-                        "+",
-                        "-",
-                        "*",
-                        "**",
-                        "/",
-                        "%",
-                        "==",
-                        "!=",
-                        ">",
-                        "<",
-                        ">=",
-                        "<=",
-                        "!",
-                        "&&",
-                        "||",
-                        "~",
-                        "&",
-                        "|",
-                        "^",
-                        "<<",
-                        ">>",
-                        "=",
-                        "+=",
-                        "-=",
-                        "*=",
-                        "**=",
-                        "/=",
-                        "%=",
-                        "&=",
-                        "|=",
-                        "^=",
-                        "<<=",
-                        ">>=",
-                        "++",
-                        "--",
-                        "?",
-                        ";",
-                        ":",
-                        "::",
-                        ",",
-                        ".",
-                        ")",
-                        "(",
-                        "}",
-                        "{",
-                        "]",
-                        "[",
-                        "TOKEN_KEYWORD",
-                        "TOKEN_PRIMARY_TYPE",
-                        "TOKEN_END_OF_FILE"};
                 printf("( ");
                 this->M_left->print();
-                std::cout << " " << BLUE_FG << to_str[(unsigned)this->M_operator] << RESET_COLOR " ";
+                std::cout << " " << BLUE_FG << this->M_operator.M_lexeme.c_str() << RESET_COLOR " ";
                 this->M_right->print();
                 printf(" )");
             }
@@ -209,20 +95,20 @@ namespace horizon
 
         class ast_data_type_node : public ast_node
         {
-            horizon_deps::vector<horizon_deps::string> M_type_qualifiers;
+            horizon_deps::vector<token> M_type_qualifiers;
             horizon_deps::sptr<ast_node> M_type;
 
           public:
-            inline ast_data_type_node(horizon_deps::vector<horizon_deps::string> &&type_qual, horizon_deps::sptr<ast_node> &&type_)
+            inline ast_data_type_node(horizon_deps::vector<token> &&type_qual, horizon_deps::sptr<ast_node> &&type_)
                 : M_type_qualifiers(std::move(type_qual)), M_type(std::move(type_)) {}
 
             inline void print() const override
             {
                 if (!this->M_type_qualifiers.is_empty())
                 {
-                    for (const horizon_deps::string &i : this->M_type_qualifiers)
+                    for (const token &i : this->M_type_qualifiers)
                     {
-                        std::cout << RED_FG << i.c_str() << RESET_COLOR " ";
+                        std::cout << RED_FG << i.M_lexeme.c_str() << RESET_COLOR " ";
                     }
                 }
                 if (this->M_type)
@@ -258,10 +144,10 @@ namespace horizon
         class ast_variable_declaration_node : public ast_node
         {
             horizon_deps::sptr<ast_node> M_type;
-            horizon_deps::vector<horizon_deps::pair<horizon_deps::string, horizon_deps::sptr<ast_node>>> M_variables;
+            horizon_deps::vector<horizon_deps::pair<token, horizon_deps::sptr<ast_node>>> M_variables;
 
           public:
-            inline ast_variable_declaration_node(horizon_deps::sptr<ast_node> &&type, horizon_deps::vector<horizon_deps::pair<horizon_deps::string, horizon_deps::sptr<ast_node>>> &&vars)
+            inline ast_variable_declaration_node(horizon_deps::sptr<ast_node> &&type, horizon_deps::vector<horizon_deps::pair<token, horizon_deps::sptr<ast_node>>> &&vars)
                 : M_type(std::move(type)), M_variables(std::move(vars)) {}
 
             inline void print() const override
@@ -270,9 +156,9 @@ namespace horizon
                 if (this->M_type)
                     this->M_type->print();
                 std::cout << "(\n";
-                for (const horizon_deps::pair<horizon_deps::string, horizon_deps::sptr<ast_node>> &i : this->M_variables)
+                for (const horizon_deps::pair<token, horizon_deps::sptr<ast_node>> &i : this->M_variables)
                 {
-                    std::cout << "\tNAME: " << PURPLE_FG << (i.get_first().c_str() == nullptr ? "(null)" : i.get_first().c_str()) << RESET_COLOR "    VALUE: ";
+                    std::cout << "\tNAME: " << PURPLE_FG << (i.get_first().M_lexeme.c_str() == nullptr ? "(null)" : i.get_first().M_lexeme.c_str()) << RESET_COLOR "    VALUE: ";
                     if (i.raw_second())
                         i.get_second()->print();
                     std::cout << "\n";
@@ -283,16 +169,16 @@ namespace horizon
 
         class ast_function_call_node : public ast_node
         {
-            horizon_deps::string M_identifier;
+            token M_identifier;
             horizon_deps::vector<horizon_deps::sptr<ast_node>> M_arguments;
 
           public:
-            inline ast_function_call_node(horizon_deps::string &&identifier, horizon_deps::vector<horizon_deps::sptr<ast_node>> &&args)
+            inline ast_function_call_node(token &&identifier, horizon_deps::vector<horizon_deps::sptr<ast_node>> &&args)
                 : M_identifier(std::move(identifier)), M_arguments(std::move(args)) {}
 
             inline void print() const override
             {
-                std::cout << "CALL NAME: " << PURPLE_FG << this->M_identifier.c_str() << RESET_COLOR "( ";
+                std::cout << "CALL NAME: " << PURPLE_FG << this->M_identifier.M_lexeme.c_str() << RESET_COLOR "( ";
                 for (std::size_t i = 0; i < this->M_arguments.length(); i++)
                 {
                     if (this->M_arguments[i])
@@ -459,16 +345,16 @@ namespace horizon
 
         class ast_jump_statement_node : public ast_node
         {
-            horizon_deps::string M_keyword;
+            token M_keyword;
             horizon_deps::sptr<ast_node> M_expression;
 
           public:
-            inline ast_jump_statement_node(horizon_deps::string &&keyword__, horizon_deps::sptr<ast_node> &&expr)
+            inline ast_jump_statement_node(token &&keyword__, horizon_deps::sptr<ast_node> &&expr)
                 : M_keyword(std::move(keyword__)), M_expression(std::move(expr)) {}
 
             inline void print() const override
             {
-                std::cout << RED_FG << this->M_keyword.c_str() << RESET_COLOR " ";
+                std::cout << RED_FG << this->M_keyword.M_lexeme.c_str() << RESET_COLOR " ";
                 if (this->M_expression)
                     this->M_expression->print();
             }
@@ -476,10 +362,10 @@ namespace horizon
 
         class ast_parameter_node : public ast_node
         {
-            horizon_deps::vector<horizon_deps::pair<horizon_deps::sptr<ast_node>, horizon_deps::vector<horizon_deps::pair<horizon_deps::string, horizon_deps::sptr<ast_node>>>>> M_parameters;
+            horizon_deps::vector<horizon_deps::pair<horizon_deps::sptr<ast_node>, horizon_deps::vector<horizon_deps::pair<token, horizon_deps::sptr<ast_node>>>>> M_parameters;
 
           public:
-            inline ast_parameter_node(horizon_deps::vector<horizon_deps::pair<horizon_deps::sptr<ast_node>, horizon_deps::vector<horizon_deps::pair<horizon_deps::string, horizon_deps::sptr<ast_node>>>>> &&params)
+            inline ast_parameter_node(horizon_deps::vector<horizon_deps::pair<horizon_deps::sptr<ast_node>, horizon_deps::vector<horizon_deps::pair<token, horizon_deps::sptr<ast_node>>>>> &&params)
                 : M_parameters(std::move(params)) {}
 
             inline void print() const override
@@ -497,7 +383,7 @@ namespace horizon
                         }
                         for (std::size_t j = 0; j < this->M_parameters[i].get_second().length(); j++)
                         {
-                            std::cout << "NAME: " << PURPLE_FG << this->M_parameters[i].get_second()[j].get_first().c_str() << RESET_COLOR " VALUE: ";
+                            std::cout << "NAME: " << PURPLE_FG << this->M_parameters[i].get_second()[j].get_first().M_lexeme.c_str() << RESET_COLOR " VALUE: ";
                             if (this->M_parameters[i].get_second()[j].raw_second())
                             {
                                 this->M_parameters[i].get_second()[j].get_second()->print();
@@ -515,18 +401,18 @@ namespace horizon
 
         class ast_function_declaration_node : public ast_node
         {
-            horizon_deps::string M_identifier;
+            token M_identifier;
             horizon_deps::sptr<ast_node> M_parameters;
             horizon_deps::sptr<ast_node> M_return_type;
             horizon_deps::sptr<ast_node> M_block;
 
           public:
-            inline ast_function_declaration_node(horizon_deps::string &&identifier, horizon_deps::sptr<ast_node> &&var_decl, horizon_deps::sptr<ast_node> &&return_type, horizon_deps::sptr<ast_node> &&block)
+            inline ast_function_declaration_node(token &&identifier, horizon_deps::sptr<ast_node> &&var_decl, horizon_deps::sptr<ast_node> &&return_type, horizon_deps::sptr<ast_node> &&block)
                 : M_identifier(std::move(identifier)), M_parameters(std::move(var_decl)), M_return_type(std::move(return_type)), M_block(std::move(block)) {}
 
             inline void print() const override
             {
-                std::cout << "FUNC_DECL NAME: " << PURPLE_FG << this->M_identifier.c_str() << RESET_COLOR "(\nPARAMETERS:\n";
+                std::cout << "FUNC_DECL NAME: " << PURPLE_FG << this->M_identifier.M_lexeme.c_str() << RESET_COLOR "(\nPARAMETERS:\n";
                 if (this->M_parameters)
                     this->M_parameters->print();
                 std::cout << "RETURN TYPE: ";

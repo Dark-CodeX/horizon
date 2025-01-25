@@ -15,17 +15,17 @@ namespace horizon
             return this->get_token().M_type == token_type::TOKEN_END_OF_FILE;
         }
 
-        const token &parser::pre_advance()
-        {
-            return this->M_tokens[++this->M_current_parser];
-        }
-
-        const token &parser::post_advance()
+        token &parser::post_advance()
         {
             return this->M_tokens[this->M_current_parser++];
         }
 
         const token &parser::get_token() const
+        {
+            return this->M_tokens[this->M_current_parser];
+        }
+
+        token &parser::get_token()
         {
             return this->M_tokens[this->M_current_parser];
         }
@@ -53,7 +53,7 @@ namespace horizon
 
         horizon_deps::sptr<ast_node> parser::parse_data_type()
         {
-            horizon_deps::vector<horizon_deps::string> type_qualifiers;
+            horizon_deps::vector<token> type_qualifiers;
             horizon_deps::sptr<ast_node> _type = nullptr;
 
             if (this->get_token().M_type == token_type::TOKEN_KEYWORD)
@@ -62,7 +62,7 @@ namespace horizon
                        this->get_token().M_lexeme == "ref" ||
                        this->get_token().M_lexeme == "static")
                 {
-                    type_qualifiers.add(this->post_advance().M_lexeme);
+                    type_qualifiers.add(std::move(this->post_advance()));
                 }
                 type_qualifiers.shrink_to_fit();
             }
@@ -87,10 +87,10 @@ namespace horizon
 
         horizon_deps::sptr<ast_node> parser::parse_parameters()
         {
-            horizon_deps::vector<horizon_deps::pair<horizon_deps::sptr<ast_node>, horizon_deps::vector<horizon_deps::pair<horizon_deps::string, horizon_deps::sptr<ast_node>>>>> params;
+            horizon_deps::vector<horizon_deps::pair<horizon_deps::sptr<ast_node>, horizon_deps::vector<horizon_deps::pair<token, horizon_deps::sptr<ast_node>>>>> params;
             while (this->get_token().M_type != token_type::TOKEN_RIGHT_PAREN && !this->has_reached_end())
             {
-                horizon_deps::pair<horizon_deps::sptr<ast_node>, horizon_deps::vector<horizon_deps::pair<horizon_deps::string, horizon_deps::sptr<ast_node>>>> temp_pair1;
+                horizon_deps::pair<horizon_deps::sptr<ast_node>, horizon_deps::vector<horizon_deps::pair<token, horizon_deps::sptr<ast_node>>>> temp_pair1;
                 temp_pair1.raw_first() = new horizon_deps::sptr<ast_node>(this->parse_data_type());
                 if (!(*temp_pair1.raw_first()))
                     return nullptr;
@@ -101,10 +101,10 @@ namespace horizon
                     return nullptr;
                 }
                 this->post_advance();
-                horizon_deps::vector<horizon_deps::pair<horizon_deps::string, horizon_deps::sptr<ast_node>>> temp_vec;
+                horizon_deps::vector<horizon_deps::pair<token, horizon_deps::sptr<ast_node>>> temp_vec;
                 while (this->get_token().M_type != token_type::TOKEN_COMMA && this->get_token().M_type != token_type::TOKEN_RIGHT_PAREN && !this->has_reached_end())
                 {
-                    horizon_deps::pair<horizon_deps::string, horizon_deps::sptr<ast_node>> temp_pair2;
+                    horizon_deps::pair<token, horizon_deps::sptr<ast_node>> temp_pair2;
                     std::size_t temp_curr_parser = this->M_current_parser;
                     bool is_data_type = false;
                     while (this->get_token().M_type != token_type::TOKEN_COMMA && this->get_token().M_type != token_type::TOKEN_RIGHT_PAREN && !this->has_reached_end())
@@ -125,7 +125,7 @@ namespace horizon
                         return nullptr;
                     }
                     else if (this->get_token().M_type == token_type::TOKEN_IDENTIFIER)
-                        temp_pair2.raw_first() = new horizon_deps::string(this->get_token().M_lexeme);
+                        temp_pair2.raw_first() = new token(std::move(this->get_token()));
                     else
                     {
                         this->handle_eof();
@@ -162,7 +162,7 @@ namespace horizon
                     temp_vec.add(std::move(temp_pair2));
                 }
                 temp_vec.shrink_to_fit();
-                temp_pair1.raw_second() = new horizon_deps::vector<horizon_deps::pair<horizon_deps::string, horizon_deps::sptr<ast_node>>>(std::move(temp_vec));
+                temp_pair1.raw_second() = new horizon_deps::vector<horizon_deps::pair<token, horizon_deps::sptr<ast_node>>>(std::move(temp_vec));
                 params.add(std::move(temp_pair1));
             }
             params.shrink_to_fit();
@@ -177,7 +177,7 @@ namespace horizon
                 horizon_errors::errors::parser_draw_error(horizon_errors::error_code::HORIZON_SYNTAX_ERROR, this->M_file, this->get_token(), {"expected 'func', but got", this->get_token().M_lexeme.wrap("'")});
                 return nullptr;
             }
-            horizon_deps::string identifier = nullptr;
+            token identifier;
             horizon_deps::sptr<ast_node> parameters = nullptr;
             horizon_deps::sptr<ast_node> return_type = nullptr;
             horizon_deps::sptr<ast_node> block = nullptr;
@@ -190,7 +190,7 @@ namespace horizon
                 return nullptr;
             }
             else if (this->get_token().M_type == token_type::TOKEN_IDENTIFIER)
-                identifier = this->get_token().M_lexeme;
+                identifier = std::move(this->get_token());
             else
             {
                 this->handle_eof();
@@ -241,17 +241,17 @@ namespace horizon
 
         horizon_deps::sptr<ast_node> parser::parse_jump_statements()
         {
-            horizon_deps::string keyword_;
+            token keyword_;
             horizon_deps::sptr<ast_node> expr = nullptr;
             if (this->get_token().M_lexeme == "break" || this->get_token().M_lexeme == "continue")
             {
-                keyword_ = this->post_advance().M_lexeme;
+                keyword_ = std::move(this->post_advance());
                 if (!this->handle_semicolon())
                     return nullptr;
             }
             else if (this->get_token().M_lexeme == "return")
             {
-                keyword_ = this->post_advance().M_lexeme;
+                keyword_ = std::move(this->post_advance());
                 if (this->get_token().M_type == token_type::TOKEN_SEMICOLON)
                 {
                     this->post_advance();
@@ -601,7 +601,7 @@ namespace horizon
             horizon_deps::sptr<ast_node> type_ = this->parse_data_type();
             if (!type_)
                 return nullptr;
-            horizon_deps::vector<horizon_deps::pair<horizon_deps::string, horizon_deps::sptr<ast_node>>> vec(5);
+            horizon_deps::vector<horizon_deps::pair<token, horizon_deps::sptr<ast_node>>> vec(5);
             if (this->get_token().M_type != token_type::TOKEN_COLON)
             {
                 this->handle_eof();
@@ -611,7 +611,7 @@ namespace horizon
             this->post_advance();
             while (this->get_token().M_type != token_type::TOKEN_SEMICOLON && !this->has_reached_end())
             {
-                horizon_deps::pair<horizon_deps::string, horizon_deps::sptr<ast_node>> pair;
+                horizon_deps::pair<token, horizon_deps::sptr<ast_node>> pair;
                 if (this->get_token().M_type == token_type::TOKEN_PRIMARY_TYPE || this->get_token().M_type == token_type::TOKEN_KEYWORD)
                 {
                     this->handle_eof();
@@ -620,9 +620,7 @@ namespace horizon
                 }
                 else if (this->get_token().M_type == token_type::TOKEN_IDENTIFIER)
                 {
-                    pair.raw_first() = new horizon_deps::string(this->get_token().M_lexeme);
-                    if ((*pair.raw_first()).is_null())
-                        return nullptr;
+                    pair.raw_first() = new token(std::move(this->get_token()));
                 }
                 else
                 {
@@ -686,11 +684,11 @@ namespace horizon
                    this->get_token().M_type == token_type::TOKEN_ASSIGN_LEFT_SHIFT ||
                    this->get_token().M_type == token_type::TOKEN_ASSIGN_RIGHT_SHIFT)
             {
-                const token &operator_token = this->post_advance();
+                token &operator_token = this->post_advance();
                 horizon_deps::sptr<ast_node> right = this->parse_ternary_operator();
                 if (!right)
                     return nullptr;
-                left = new ast_binary_operation_node(std::move(left), operator_token.M_type, std::move(right));
+                left = new ast_binary_operation_node(std::move(left), std::move(operator_token), std::move(right));
             }
             return left;
         }
@@ -752,11 +750,11 @@ namespace horizon
                 return nullptr;
             while (this->get_token().M_type == token_type::TOKEN_LOGICAL_OR)
             {
-                const token &operator_token = this->post_advance();
+                token &operator_token = this->post_advance();
                 horizon_deps::sptr<ast_node> right = this->parse_logical_and();
                 if (!right)
                     return nullptr;
-                left = new ast_binary_operation_node(std::move(left), operator_token.M_type, std::move(right));
+                left = new ast_binary_operation_node(std::move(left), std::move(operator_token), std::move(right));
             }
             return left;
         }
@@ -768,11 +766,11 @@ namespace horizon
                 return nullptr;
             while (this->get_token().M_type == token_type::TOKEN_LOGICAL_AND)
             {
-                const token &operator_token = this->post_advance();
+                token &operator_token = this->post_advance();
                 horizon_deps::sptr<ast_node> right = this->parse_bitwise_or();
                 if (!right)
                     return nullptr;
-                left = new ast_binary_operation_node(std::move(left), operator_token.M_type, std::move(right));
+                left = new ast_binary_operation_node(std::move(left), std::move(operator_token), std::move(right));
             }
             return left;
         }
@@ -784,11 +782,11 @@ namespace horizon
                 return nullptr;
             while (this->get_token().M_type == token_type::TOKEN_BITWISE_OR)
             {
-                const token &operator_token = this->post_advance();
+                token &operator_token = this->post_advance();
                 horizon_deps::sptr<ast_node> right = this->parse_bitwise_xor();
                 if (!right)
                     return nullptr;
-                left = new ast_binary_operation_node(std::move(left), operator_token.M_type, std::move(right));
+                left = new ast_binary_operation_node(std::move(left), std::move(operator_token), std::move(right));
             }
             return left;
         }
@@ -800,11 +798,11 @@ namespace horizon
                 return nullptr;
             while (this->get_token().M_type == token_type::TOKEN_BITWISE_XOR)
             {
-                const token &operator_token = this->post_advance();
+                token &operator_token = this->post_advance();
                 horizon_deps::sptr<ast_node> right = this->parse_bitwise_and();
                 if (!right)
                     return nullptr;
-                left = new ast_binary_operation_node(std::move(left), operator_token.M_type, std::move(right));
+                left = new ast_binary_operation_node(std::move(left), std::move(operator_token), std::move(right));
             }
             return left;
         }
@@ -816,11 +814,11 @@ namespace horizon
                 return nullptr;
             while (this->get_token().M_type == token_type::TOKEN_BITWISE_AND)
             {
-                const token &operator_token = this->post_advance();
+                token &operator_token = this->post_advance();
                 horizon_deps::sptr<ast_node> right = this->parse_equality_operator();
                 if (!right)
                     return nullptr;
-                left = new ast_binary_operation_node(std::move(left), operator_token.M_type, std::move(right));
+                left = new ast_binary_operation_node(std::move(left), std::move(operator_token), std::move(right));
             }
             return left;
         }
@@ -833,11 +831,11 @@ namespace horizon
             while (this->get_token().M_type == token_type::TOKEN_RELATIONAL_EQUAL_TO ||
                    this->get_token().M_type == token_type::TOKEN_RELATIONAL_NOT_EQUAL_TO)
             {
-                const token &operator_token = this->post_advance();
+                token &operator_token = this->post_advance();
                 horizon_deps::sptr<ast_node> right = this->parse_relational_operator();
                 if (!right)
                     return nullptr;
-                left = new ast_binary_operation_node(std::move(left), operator_token.M_type, std::move(right));
+                left = new ast_binary_operation_node(std::move(left), std::move(operator_token), std::move(right));
             }
             return left;
         }
@@ -852,11 +850,11 @@ namespace horizon
                    this->get_token().M_type == token_type::TOKEN_RELATIONAL_GREATER_THAN_OR_EQUAL_TO ||
                    this->get_token().M_type == token_type::TOKEN_RELATIONAL_LESS_THAN_OR_EQUAL_TO)
             {
-                const token &operator_token = this->post_advance();
+                token &operator_token = this->post_advance();
                 horizon_deps::sptr<ast_node> right = this->parse_bitwise_shift();
                 if (!right)
                     return nullptr;
-                left = new ast_binary_operation_node(std::move(left), operator_token.M_type, std::move(right));
+                left = new ast_binary_operation_node(std::move(left), std::move(operator_token), std::move(right));
             }
             return left;
         }
@@ -869,11 +867,11 @@ namespace horizon
             while (this->get_token().M_type == token_type::TOKEN_BITWISE_LEFT_SHIFT ||
                    this->get_token().M_type == token_type::TOKEN_BITWISE_RIGHT_SHIFT)
             {
-                const token &operator_token = this->post_advance();
+                token &operator_token = this->post_advance();
                 horizon_deps::sptr<ast_node> right = this->parse_expr();
                 if (!right)
                     return nullptr;
-                left = new ast_binary_operation_node(std::move(left), operator_token.M_type, std::move(right));
+                left = new ast_binary_operation_node(std::move(left), std::move(operator_token), std::move(right));
             }
             return left;
         }
@@ -886,11 +884,11 @@ namespace horizon
             while (this->get_token().M_type == token_type::TOKEN_ARITHMETIC_ADD ||
                    this->get_token().M_type == token_type::TOKEN_ARITHMETIC_SUBSTRACT)
             {
-                const token &operator_token = this->post_advance();
+                token &operator_token = this->post_advance();
                 horizon_deps::sptr<ast_node> right = this->parse_term();
                 if (!right)
                     return nullptr;
-                left = new ast_binary_operation_node(std::move(left), operator_token.M_type, std::move(right));
+                left = new ast_binary_operation_node(std::move(left), std::move(operator_token), std::move(right));
             }
             return left;
         }
@@ -904,11 +902,11 @@ namespace horizon
                    this->get_token().M_type == token_type::TOKEN_ARITHMETIC_DIVIDE ||
                    this->get_token().M_type == token_type::TOKEN_ARITHMETIC_MODULUS)
             {
-                const token &operator_token = this->post_advance();
+                token &operator_token = this->post_advance();
                 horizon_deps::sptr<ast_node> right = this->parse_exponent();
                 if (!right)
                     return nullptr;
-                left = new ast_binary_operation_node(std::move(left), operator_token.M_type, std::move(right));
+                left = new ast_binary_operation_node(std::move(left), std::move(operator_token), std::move(right));
             }
             return left;
         }
@@ -920,11 +918,11 @@ namespace horizon
                 return nullptr;
             while (this->get_token().M_type == token_type::TOKEN_ARITHMETIC_POWER)
             {
-                const token &operator_token = this->post_advance();
+                token &operator_token = this->post_advance();
                 horizon_deps::sptr<ast_node> right = this->parse_unary_operators();
                 if (!right)
                     return nullptr;
-                left = new ast_binary_operation_node(std::move(left), operator_token.M_type, std::move(right));
+                left = new ast_binary_operation_node(std::move(left), std::move(operator_token), std::move(right));
             }
             return left;
         }
@@ -939,11 +937,11 @@ namespace horizon
                 current_type == token_type::TOKEN_LOGICAL_NOT ||
                 current_type == token_type::TOKEN_BITWISE_NOT)
             {
-                const token &operator_token = this->post_advance();
+                token &operator_token = this->post_advance();
                 horizon_deps::sptr<ast_node> operand = this->parse_unary_operators();
                 if (!operand)
                     return nullptr;
-                return new ast_unary_operation_node(std::move(operand), operator_token.M_type, true);
+                return new ast_unary_operation_node(std::move(operand), std::move(operator_token), true);
             }
             else
             {
@@ -953,8 +951,8 @@ namespace horizon
                 while (this->get_token().M_type == token_type::TOKEN_INCREMENT ||
                        this->get_token().M_type == token_type::TOKEN_DECREMENT)
                 {
-                    const token &operator_token = this->post_advance();
-                    left = new ast_unary_operation_node(std::move(left), operator_token.M_type, false);
+                    token &operator_token = this->post_advance();
+                    left = new ast_unary_operation_node(std::move(left), std::move(operator_token), false);
                 }
                 return left;
             }
@@ -968,11 +966,11 @@ namespace horizon
             while (this->get_token().M_type == token_type::TOKEN_DOT ||
                    this->get_token().M_type == token_type::TOKEN_MEMEBER_ACCESS)
             {
-                const token &operator_token = this->post_advance();
+                token &operator_token = this->post_advance();
                 horizon_deps::sptr<ast_node> right = this->parse_identifier();
                 if (!right)
                     return nullptr;
-                left = new ast_binary_operation_node(std::move(left), operator_token.M_type, std::move(right));
+                left = new ast_binary_operation_node(std::move(left), std::move(operator_token), std::move(right));
             }
             return left;
         }
@@ -981,7 +979,7 @@ namespace horizon
         {
             if (this->get_token().M_type == token_type::TOKEN_IDENTIFIER)
             {
-                horizon_deps::string identifier = this->post_advance().M_lexeme;
+                token &identifier = this->post_advance();
                 if (this->get_token().M_type == token_type::TOKEN_LEFT_PAREN)
                 {
                     this->post_advance();
@@ -1015,7 +1013,7 @@ namespace horizon
                     return new ast_function_call_node(std::move(identifier), std::move(vec));
                 }
                 else
-                    return new ast_operand_node(std::move(identifier));
+                    return new ast_operand_node(std::move(identifier.M_lexeme));
             }
             else if (this->get_token().M_type == token_type::TOKEN_KEYWORD)
             {
