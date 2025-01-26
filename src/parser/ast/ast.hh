@@ -426,6 +426,24 @@ namespace horizon
                 std::cout << ")\n";
             }
         };
+
+        class ast_program_node : public ast_node
+        {
+            horizon_deps::vector<horizon_deps::sptr<ast_node>> M_nodes;
+
+          public:
+            inline ast_program_node(horizon_deps::vector<horizon_deps::sptr<ast_node>> &&nodes)
+                : M_nodes(std::move(nodes)) {}
+
+            inline void print() const override
+            {
+                for (const horizon_deps::sptr<ast_node> &i : this->M_nodes)
+                {
+                    if (i)
+                        i->print();
+                }
+            }
+        };
     }
 }
 
