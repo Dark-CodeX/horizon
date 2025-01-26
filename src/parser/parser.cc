@@ -51,6 +51,29 @@ namespace horizon
                 this->M_current_parser--;
         }
 
+        horizon_deps::sptr<ast_node> parser::parse_program()
+        {
+            horizon_deps::vector<horizon_deps::sptr<ast_node>> nodes;
+            while (!this->has_reached_end())
+            {
+                horizon_deps::sptr<ast_node> temp = nullptr;
+                if (this->get_token().M_lexeme == "func")
+                    temp = this->parse_function();
+                else
+                {
+                    //global varibales
+                    temp = this->parse_variable_decl();
+                    if (!this->handle_semicolon())
+                        return nullptr;
+                }
+                if (!temp)
+                    return nullptr;
+                nodes.add(std::move(temp));
+            }
+            nodes.shrink_to_fit();
+            return new ast_program_node(std::move(nodes));
+        }
+
         horizon_deps::sptr<ast_node> parser::parse_data_type()
         {
             horizon_deps::vector<token> type_qualifiers;
@@ -1094,13 +1117,9 @@ namespace horizon
 
         bool parser::init_parsing()
         {
-            while (!this->has_reached_end())
-            {
-                this->M_ast = this->parse_function();
-                if (!this->M_ast)
-                    return false;
-                this->M_ast->print();
-            }
+            this->M_ast = this->parse_program();
+            if (!this->M_ast)
+                return false;
             this->M_tokens.erase();
             return true;
         }
