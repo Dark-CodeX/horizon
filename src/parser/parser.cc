@@ -61,7 +61,7 @@ namespace horizon
                     temp = this->parse_function();
                 else
                 {
-                    //global varibales
+                    // global varibales
                     temp = this->parse_variable_decl();
                     if (!this->handle_semicolon())
                         return nullptr;
@@ -1093,7 +1093,9 @@ namespace horizon
             }
             else if (this->get_token().M_type == token_type::TOKEN_STRING_LITERAL)
             {
-                return new ast_operand_node(this->post_advance().M_lexeme.c_str());
+                const char *ptr = this->get_token().M_lexeme.c_str();
+                this->post_advance().M_lexeme.raw() = nullptr;
+                return new ast_operand_node(ptr);
             }
             else if (this->get_token().M_type == token_type::TOKEN_CHAR_LITERAL)
             {
@@ -1121,6 +1123,7 @@ namespace horizon
             if (!this->M_ast)
                 return false;
             this->M_tokens.erase();
+            this->M_ast->print();
             return true;
         }
     }
