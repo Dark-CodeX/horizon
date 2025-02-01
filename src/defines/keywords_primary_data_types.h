@@ -12,12 +12,10 @@
 static const char *horizon_keywords[] = {
     "let",
     "func",
-    "new",
-    "delete",
-    "resize",
-    "move",
-    "copy",
     "sizeof",
+    "operator",
+    "heap",
+    "array",
     "export",
     "public",
     "private",
@@ -45,8 +43,7 @@ static const char *horizon_keywords[] = {
     "match",
     "case",
     "break",
-    "continue",
-    "default"};
+    "continue"};
 
 static const char *horizon_primary_data_types[] = {
     "char",
