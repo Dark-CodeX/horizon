@@ -17,8 +17,8 @@ namespace horizon
         class pair
         {
           private:
-            T *ptr1;
-            U *ptr2;
+            T *M_ptr1;
+            U *M_ptr2;
 
           public:
             pair();
@@ -46,52 +46,52 @@ namespace horizon
         template <typename T, typename U>
         pair<T, U>::pair()
         {
-            this->ptr1 = nullptr;
-            this->ptr2 = nullptr;
+            this->M_ptr1 = nullptr;
+            this->M_ptr2 = nullptr;
         }
 
         template <typename T, typename U>
         pair<T, U>::pair(const T &p1, const U &p2)
         {
-            this->ptr1 = new T(p1);
-            this->ptr2 = new U(p2);
-            horizon_misc::exit_heap_fail(this->ptr1, "horizon::horizon_deps::pair");
-            horizon_misc::exit_heap_fail(this->ptr2, "horizon::horizon_deps::pair");
+            this->M_ptr1 = new T(p1);
+            this->M_ptr2 = new U(p2);
+            horizon_misc::exit_heap_fail(this->M_ptr1, "horizon::horizon_deps::pair");
+            horizon_misc::exit_heap_fail(this->M_ptr2, "horizon::horizon_deps::pair");
         }
 
         template <typename T, typename U>
         pair<T, U>::pair(T &&p1, U &&p2) noexcept(true)
         {
-            this->ptr1 = new T(std::move(p1));
-            this->ptr2 = new U(std::move(p2));
-            horizon_misc::exit_heap_fail(this->ptr1, "horizon::horizon_deps::pair");
-            horizon_misc::exit_heap_fail(this->ptr2, "horizon::horizon_deps::pair");
+            this->M_ptr1 = new T(std::move(p1));
+            this->M_ptr2 = new U(std::move(p2));
+            horizon_misc::exit_heap_fail(this->M_ptr1, "horizon::horizon_deps::pair");
+            horizon_misc::exit_heap_fail(this->M_ptr2, "horizon::horizon_deps::pair");
         }
 
         template <typename T, typename U>
         pair<T, U>::pair(const pair &p)
         {
-            this->ptr1 = new T(*p.ptr1);
-            this->ptr2 = new U(*p.ptr2);
-            horizon_misc::exit_heap_fail(this->ptr1, "horizon::horizon_deps::pair");
-            horizon_misc::exit_heap_fail(this->ptr2, "horizon::horizon_deps::pair");
+            this->M_ptr1 = new T(*p.M_ptr1);
+            this->M_ptr2 = new U(*p.M_ptr2);
+            horizon_misc::exit_heap_fail(this->M_ptr1, "horizon::horizon_deps::pair");
+            horizon_misc::exit_heap_fail(this->M_ptr2, "horizon::horizon_deps::pair");
         }
 
         template <typename T, typename U>
         pair<T, U>::pair(pair &&p) noexcept(true)
         {
-            this->ptr1 = p.ptr1;
-            this->ptr2 = p.ptr2;
+            this->M_ptr1 = p.M_ptr1;
+            this->M_ptr2 = p.M_ptr2;
 
-            p.ptr1 = nullptr;
-            p.ptr2 = nullptr;
+            p.M_ptr1 = nullptr;
+            p.M_ptr2 = nullptr;
         }
 
         template <typename T, typename U>
         pair<T, U>::pair(T *p1, U *p2)
         {
-            this->ptr1 = p1;
-            this->ptr2 = p2;
+            this->M_ptr1 = p1;
+            this->M_ptr2 = p2;
 
             p1 = nullptr;
             p2 = nullptr;
@@ -100,23 +100,23 @@ namespace horizon
         template <typename T, typename U>
         bool pair<T, U>::is_null() const
         {
-            return this->ptr1 == nullptr && this->ptr2 == nullptr;
+            return this->M_ptr1 == nullptr && this->M_ptr2 == nullptr;
         }
 
         template <typename T, typename U>
         bool pair<T, U>::release()
         {
             bool is_done = false;
-            if (this->ptr1)
+            if (this->M_ptr1)
             {
-                delete this->ptr1;
-                this->ptr1 = nullptr;
+                delete this->M_ptr1;
+                this->M_ptr1 = nullptr;
                 is_done = true;
             }
-            if (this->ptr2)
+            if (this->M_ptr2)
             {
-                delete this->ptr2;
-                this->ptr2 = nullptr;
+                delete this->M_ptr2;
+                this->M_ptr2 = nullptr;
                 is_done = true;
             }
             return is_done;
@@ -125,49 +125,49 @@ namespace horizon
         template <typename T, typename U>
         T &pair<T, U>::get_first()
         {
-            return *this->ptr1;
+            return *this->M_ptr1;
         }
 
         template <typename T, typename U>
         const T &pair<T, U>::get_first() const
         {
-            return *this->ptr1;
+            return *this->M_ptr1;
         }
 
         template <typename T, typename U>
         U &pair<T, U>::get_second()
         {
-            return *this->ptr2;
+            return *this->M_ptr2;
         }
 
         template <typename T, typename U>
         const U &pair<T, U>::get_second() const
         {
-            return *this->ptr2;
+            return *this->M_ptr2;
         }
 
         template <typename T, typename U>
         const T *pair<T, U>::raw_first() const
         {
-            return this->ptr1;
+            return this->M_ptr1;
         }
 
         template <typename T, typename U>
         T *&pair<T, U>::raw_first()
         {
-            return this->ptr1;
+            return this->M_ptr1;
         }
 
         template <typename T, typename U>
         const U *pair<T, U>::raw_second() const
         {
-            return this->ptr2;
+            return this->M_ptr2;
         }
 
         template <typename T, typename U>
         U *&pair<T, U>::raw_second()
         {
-            return this->ptr2;
+            return this->M_ptr2;
         }
 
         template <typename T, typename U>
@@ -176,10 +176,10 @@ namespace horizon
             if (this != &p)
             {
                 this->release();
-                this->ptr1 = new T(*p.ptr1);
-                this->ptr2 = new U(*p.ptr2);
-                horizon_misc::exit_heap_fail(this->ptr1, "horizon::horizon_deps::pair");
-                horizon_misc::exit_heap_fail(this->ptr2, "horizon::horizon_deps::pair");
+                this->M_ptr1 = new T(*p.M_ptr1);
+                this->M_ptr2 = new U(*p.M_ptr2);
+                horizon_misc::exit_heap_fail(this->M_ptr1, "horizon::horizon_deps::pair");
+                horizon_misc::exit_heap_fail(this->M_ptr2, "horizon::horizon_deps::pair");
             }
             return *this;
         }
@@ -191,11 +191,11 @@ namespace horizon
             if (this != &p)
             {
                 this->release();
-                this->ptr1 = p.ptr1;
-                this->ptr2 = p.ptr2;
+                this->M_ptr1 = p.M_ptr1;
+                this->M_ptr2 = p.M_ptr2;
 
-                p.ptr1 = nullptr;
-                p.ptr2 = nullptr;
+                p.M_ptr1 = nullptr;
+                p.M_ptr2 = nullptr;
             }
             return *this;
         }
@@ -209,15 +209,15 @@ namespace horizon
         template <typename T, typename U>
         pair<T, U>::~pair()
         {
-            if (this->ptr1)
+            if (this->M_ptr1)
             {
-                delete this->ptr1;
-                this->ptr1 = nullptr;
+                delete this->M_ptr1;
+                this->M_ptr1 = nullptr;
             }
-            if (this->ptr2)
+            if (this->M_ptr2)
             {
-                delete this->ptr2;
-                this->ptr2 = nullptr;
+                delete this->M_ptr2;
+                this->M_ptr2 = nullptr;
             }
         }
     }
