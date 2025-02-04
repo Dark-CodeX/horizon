@@ -41,8 +41,8 @@ namespace horizon
             static bool str_cmp(const char *str, const std::size_t &len, const char &c);
 
           private:
-            char *str;
-            std::size_t len;
+            char *M_str;
+            std::size_t M_len;
 
           public:
             string();
