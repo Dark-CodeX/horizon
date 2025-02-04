@@ -31,8 +31,8 @@ namespace horizon
         class vector
         {
           private:
-            T *data;
-            std::size_t len, cap;
+            T *M_data;
+            std::size_t M_len, M_cap;
 
           private:
             void init_vector(const std::size_t &N);
@@ -73,30 +73,30 @@ namespace horizon
         template <typename T>
         void vector<T>::init_vector(const std::size_t &N)
         {
-            this->data = new T[N];
-            horizon_misc::exit_heap_fail(this->data, "horizon::horizon_deps::vector");
-            this->cap = N;
-            this->len = 0;
+            this->M_data = new T[N];
+            horizon_misc::exit_heap_fail(this->M_data, "horizon::horizon_deps::vector");
+            this->M_cap = N;
+            this->M_len = 0;
         }
 
         template <typename T>
         void vector<T>::resize_vector()
         {
-            this->cap *= 2;
-            T *temp = new T[this->cap];
+            this->M_cap *= 2;
+            T *temp = new T[this->M_cap];
             horizon_misc::exit_heap_fail(temp, "horizon::horizon_deps::vector");
-            for (std::size_t i = 0; i < this->len; i++)
-                temp[i] = std::move(this->data[i]);
-            delete[] this->data;
-            this->data = temp;
+            for (std::size_t i = 0; i < this->M_len; i++)
+                temp[i] = std::move(this->M_data[i]);
+            delete[] this->M_data;
+            this->M_data = temp;
         }
 
         template <typename T>
         vector<T>::vector()
         {
-            this->data = nullptr;
-            this->len = 0;
-            this->cap = 0;
+            this->M_data = nullptr;
+            this->M_len = 0;
+            this->M_cap = 0;
         }
 
         template <typename T>
@@ -110,9 +110,9 @@ namespace horizon
             }
             else
             {
-                this->len = 0;
-                this->cap = 0;
-                this->data = nullptr;
+                this->M_len = 0;
+                this->M_cap = 0;
+                this->M_data = nullptr;
             }
         }
 
@@ -121,44 +121,44 @@ namespace horizon
         {
             if (ptr)
             {
-                this->data = ptr;
-                this->cap = this->len = __len;
+                this->M_data = ptr;
+                this->M_cap = this->M_len = __len;
             }
             else
             {
-                this->len = 0;
-                this->cap = 0;
-                this->data = nullptr;
+                this->M_len = 0;
+                this->M_cap = 0;
+                this->M_data = nullptr;
             }
         }
 
         template <typename T>
         vector<T>::vector(const vector<T> &vec)
         {
-            if (vec.data)
+            if (vec.M_data)
             {
-                this->init_vector(vec.cap);
-                for (std::size_t i = 0; i < vec.len; i++)
-                    this->add(vec.data[i]);
+                this->init_vector(vec.M_cap);
+                for (std::size_t i = 0; i < vec.M_len; i++)
+                    this->add(vec.M_data[i]);
             }
             else
             {
-                this->len = 0;
-                this->cap = 0;
-                this->data = nullptr;
+                this->M_len = 0;
+                this->M_cap = 0;
+                this->M_data = nullptr;
             }
         }
 
         template <typename T>
         vector<T>::vector(vector &&other) noexcept(true)
         {
-            this->data = other.data;
-            this->len = other.len;
-            this->cap = other.cap;
+            this->M_data = other.M_data;
+            this->M_len = other.M_len;
+            this->M_cap = other.M_cap;
 
-            other.data = nullptr;
-            other.len = 0;
-            other.cap = 0;
+            other.M_data = nullptr;
+            other.M_len = 0;
+            other.M_cap = 0;
         }
 
         template <typename T>
@@ -186,162 +186,162 @@ namespace horizon
         template <typename T>
         const std::size_t &vector<T>::length() const
         {
-            return this->len;
+            return this->M_len;
         }
 
         template <typename T>
         const std::size_t &vector<T>::capacity() const
         {
-            return this->cap;
+            return this->M_cap;
         }
 
         template <typename T>
         vector<T> &vector<T>::add(const T &item)
         {
-            if (!this->data)
+            if (!this->M_data)
                 this->init_vector(16);
-            if (this->len == this->cap)
+            if (this->M_len == this->M_cap)
                 this->resize_vector();
-            this->data[this->len++] = item;
+            this->M_data[this->M_len++] = item;
             return *this;
         }
 
         template <typename T>
         vector<T> &vector<T>::add(T &&item)
         {
-            if (!this->data)
+            if (!this->M_data)
                 this->init_vector(16);
-            if (this->len == this->cap)
+            if (this->M_len == this->M_cap)
                 this->resize_vector();
-            this->data[this->len++] = std::move(item);
+            this->M_data[this->M_len++] = std::move(item);
             return *this;
         }
 
         template <typename T>
         vector<T> &vector<T>::remove()
         {
-            if (!this->data || this->len == 0)
+            if (!this->M_data || this->M_len == 0)
                 return *this;
-            this->data[--this->len].~T();
+            this->M_data[--this->M_len].~T();
             return *this;
         }
 
         template <typename T>
         vector<T> &vector<T>::remove(const std::size_t &nth)
         {
-            if (!this->data || this->len == 0)
+            if (!this->M_data || this->M_len == 0)
                 return *this;
-            if (nth >= this->len)
+            if (nth >= this->M_len)
             {
                 if (COLOR_ERR)
-                    std::fprintf(stderr, "horizon: " ENCLOSE(RED_FG, "error:") " " ENCLOSE(WHITE_FG, "horizon::horizon_deps::vector:") " invalid memory access in %p for %zu, max was %zu\n", static_cast<void *>(this->data), nth, this->len);
+                    std::fprintf(stderr, "horizon: " ENCLOSE(RED_FG, "error:") " " ENCLOSE(WHITE_FG, "horizon::horizon_deps::vector:") " invalid memory access in %p for %zu, max was %zu\n", static_cast<void *>(this->M_data), nth, this->M_len);
                 else
-                    std::fprintf(stderr, "horizon: error: horizon::horizon_deps::vector: invalid memory access in %p for %zu, max was %zu\n", static_cast<void *>(this->data), nth, this->len);
+                    std::fprintf(stderr, "horizon: error: horizon::horizon_deps::vector: invalid memory access in %p for %zu, max was %zu\n", static_cast<void *>(this->M_data), nth, this->M_len);
                 std::exit(EXIT_FAILURE);
             }
-            for (std::size_t i = nth; i < this->len - 1; i++)
+            for (std::size_t i = nth; i < this->M_len - 1; i++)
             {
-                this->data[i] = std::move(this->data[i + 1]);
+                this->M_data[i] = std::move(this->M_data[i + 1]);
             }
-            this->len--;
+            this->M_len--;
             return *this;
         }
 
         template <typename T>
         bool vector<T>::is_empty() const
         {
-            return this->len == 0;
+            return this->M_len == 0;
         }
 
         template <typename T>
         bool vector<T>::is_null() const
         {
-            return this->data == nullptr;
+            return this->M_data == nullptr;
         }
 
         template <typename T>
         vector<T> &vector<T>::erase()
         {
-            if (this->data)
-                delete[] this->data;
-            this->data = nullptr;
-            this->len = 0;
-            this->cap = 0;
+            if (this->M_data)
+                delete[] this->M_data;
+            this->M_data = nullptr;
+            this->M_len = 0;
+            this->M_cap = 0;
             return *this;
         }
 
         template <typename T>
         vector<T> &vector<T>::shrink_to_fit()
         {
-            if (!this->data)
+            if (!this->M_data)
                 return *this;
-            T *temp = new T[this->len];
+            T *temp = new T[this->M_len];
             horizon_misc::exit_heap_fail(temp, "horizon::horizon_deps::vector");
-            for (std::size_t i = 0; i < this->len; i++)
-                temp[i] = std::move(this->data[i]);
-            this->cap = this->len;
-            delete[] this->data;
-            this->data = temp;
+            for (std::size_t i = 0; i < this->M_len; i++)
+                temp[i] = std::move(this->M_data[i]);
+            this->M_cap = this->M_len;
+            delete[] this->M_data;
+            this->M_data = temp;
             return *this;
         }
 
         template <typename T>
         const T *vector<T>::raw() const
         {
-            return this->data;
+            return this->M_data;
         }
 
         template <typename T>
         T *&vector<T>::raw()
         {
-            return this->data;
+            return this->M_data;
         }
 
         template <typename T>
         const T *vector<T>::begin() const
         {
-            return this->data;
+            return this->M_data;
         }
 
         template <typename T>
         T *&vector<T>::begin()
         {
-            return this->data;
+            return this->M_data;
         }
 
         template <typename T>
         const T *vector<T>::end() const
         {
-            return this->data + this->len;
+            return this->M_data + this->M_len;
         }
 
         template <typename T>
         T *&vector<T>::end()
         {
-            return this->data + this->len;
+            return this->M_data + this->M_len;
         }
 
         template <typename T>
         const T &vector<T>::operator[](const std::size_t &nth) const
         {
-            if (nth < this->len && this->data)
-                return this->data[nth];
+            if (nth < this->M_len && this->M_data)
+                return this->M_data[nth];
             if (COLOR_ERR)
-                std::fprintf(stderr, "horizon: " ENCLOSE(RED_FG, "error:") " " ENCLOSE(WHITE_FG, "horizon::horizon_deps::vector:") " invalid memory access in %p for %zu, max was %zu\n", static_cast<void *>(this->data), nth, this->len);
+                std::fprintf(stderr, "horizon: " ENCLOSE(RED_FG, "error:") " " ENCLOSE(WHITE_FG, "horizon::horizon_deps::vector:") " invalid memory access in %p for %zu, max was %zu\n", static_cast<void *>(this->M_data), nth, this->M_len);
             else
-                std::fprintf(stderr, "horizon: error: horizon::horizon_deps::vector: invalid memory access in %p for %zu, max was %zu\n", static_cast<void *>(this->data), nth, this->len);
+                std::fprintf(stderr, "horizon: error: horizon::horizon_deps::vector: invalid memory access in %p for %zu, max was %zu\n", static_cast<void *>(this->M_data), nth, this->M_len);
             std::exit(EXIT_FAILURE);
         }
 
         template <typename T>
         T &vector<T>::operator[](const std::size_t &nth)
         {
-            if (nth < this->len && this->data)
-                return this->data[nth];
+            if (nth < this->M_len && this->M_data)
+                return this->M_data[nth];
             if (COLOR_ERR)
-                std::fprintf(stderr, "horizon: " ENCLOSE(RED_FG, "error:") " " ENCLOSE(WHITE_FG, "horizon::horizon_deps::vector:") " invalid memory access in %p for %zu, max was %zu\n", static_cast<void *>(this->data), nth, this->len);
+                std::fprintf(stderr, "horizon: " ENCLOSE(RED_FG, "error:") " " ENCLOSE(WHITE_FG, "horizon::horizon_deps::vector:") " invalid memory access in %p for %zu, max was %zu\n", static_cast<void *>(this->M_data), nth, this->M_len);
             else
-                std::fprintf(stderr, "horizon: error: horizon::horizon_deps::vector: invalid memory access in %p for %zu, max was %zu\n", static_cast<void *>(this->data), nth, this->len);
+                std::fprintf(stderr, "horizon: error: horizon::horizon_deps::vector: invalid memory access in %p for %zu, max was %zu\n", static_cast<void *>(this->M_data), nth, this->M_len);
             std::exit(EXIT_FAILURE);
         }
 
@@ -350,13 +350,13 @@ namespace horizon
         {
             if (this != &vec)
             {
-                if (this->data)
-                    delete[] this->data;
-                this->cap = vec.cap;
-                this->init_vector(this->cap);
-                this->len = vec.len;
-                for (std::size_t i = 0; i < vec.len; i++)
-                    this->data[i] = vec.data[i];
+                if (this->M_data)
+                    delete[] this->M_data;
+                this->M_cap = vec.M_cap;
+                this->init_vector(this->M_cap);
+                this->M_len = vec.M_len;
+                for (std::size_t i = 0; i < vec.M_len; i++)
+                    this->M_data[i] = vec.M_data[i];
             }
             return *this;
         }
@@ -366,15 +366,15 @@ namespace horizon
         {
             if (this != &__s)
             {
-                if (this->data)
-                    delete[] this->data;
-                this->data = __s.data;
-                this->cap = __s.cap;
-                this->len = __s.len;
+                if (this->M_data)
+                    delete[] this->M_data;
+                this->M_data = __s.M_data;
+                this->M_cap = __s.M_cap;
+                this->M_len = __s.M_len;
 
-                __s.data = nullptr;
-                __s.len = 0;
-                __s.cap = 0;
+                __s.M_data = nullptr;
+                __s.M_len = 0;
+                __s.M_cap = 0;
             }
             return *this;
         }
@@ -382,11 +382,11 @@ namespace horizon
         template <typename T>
         vector<T>::~vector()
         {
-            if (this->data)
-                delete[] this->data;
-            this->data = nullptr;
-            this->len = 0;
-            this->cap = 0;
+            if (this->M_data)
+                delete[] this->M_data;
+            this->M_data = nullptr;
+            this->M_len = 0;
+            this->M_cap = 0;
         }
     }
 }
