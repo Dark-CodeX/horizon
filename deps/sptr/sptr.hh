@@ -17,7 +17,7 @@ namespace horizon
         class sptr
         {
         private:
-            T *ptr;
+            T *M_ptr;
 
         public:
             sptr();
@@ -48,57 +48,57 @@ namespace horizon
         template <typename T>
         sptr<T>::sptr()
         {
-            this->ptr = nullptr;
+            this->M_ptr = nullptr;
         }
 
         template <typename T>
         sptr<T>::sptr(const T &s)
         {
-            this->ptr = new T(s);
-            horizon_misc::exit_heap_fail(this->ptr, "horizon::horizon_deps::sptr");
+            this->M_ptr = new T(s);
+            horizon_misc::exit_heap_fail(this->M_ptr, "horizon::horizon_deps::sptr");
         }
 
         template <typename T>
         sptr<T>::sptr(T &&s) noexcept(true)
         {
-            this->ptr = new T(std::move(s));
-            horizon_misc::exit_heap_fail(this->ptr, "horizon::horizon_deps::sptr");
+            this->M_ptr = new T(std::move(s));
+            horizon_misc::exit_heap_fail(this->M_ptr, "horizon::horizon_deps::sptr");
         }
 
         template <typename T>
         sptr<T>::sptr(const sptr &p)
         {
-            this->ptr = new T(*p.ptr);
-            horizon_misc::exit_heap_fail(this->ptr, "horizon::horizon_deps::sptr");
+            this->M_ptr = new T(*p.M_ptr);
+            horizon_misc::exit_heap_fail(this->M_ptr, "horizon::horizon_deps::sptr");
         }
 
         template <typename T>
         sptr<T>::sptr(sptr &&p) noexcept(true)
         {
-            this->ptr = p.ptr;
-            p.ptr = nullptr;
+            this->M_ptr = p.M_ptr;
+            p.M_ptr = nullptr;
         }
 
         template <typename T>
         sptr<T>::sptr(T *p)
         {
-            this->ptr = p;
+            this->M_ptr = p;
             p = nullptr;
         }
 
         template <typename T>
         bool sptr<T>::is_null() const
         {
-            return this->ptr == nullptr;
+            return this->M_ptr == nullptr;
         }
 
         template <typename T>
         bool sptr<T>::release()
         {
-            if (this->ptr)
+            if (this->M_ptr)
             {
-                delete this->ptr;
-                this->ptr = nullptr;
+                delete this->M_ptr;
+                this->M_ptr = nullptr;
                 return true;
             }
             return false;
@@ -107,33 +107,33 @@ namespace horizon
         template <typename T>
         T &sptr<T>::get()
         {
-            return *this->ptr;
+            return *this->M_ptr;
         }
 
         template <typename T>
         const T &sptr<T>::get() const
         {
-            return *this->ptr;
+            return *this->M_ptr;
         }
 
         template <typename T>
         const T *sptr<T>::raw() const
         {
-            return this->ptr;
+            return this->M_ptr;
         }
 
         template <typename T>
         T *&sptr<T>::raw()
         {
-            return this->ptr;
+            return this->M_ptr;
         }
 
         template <typename T>
         sptr<T> &sptr<T>::operator=(const T &s)
         {
             this->release();
-            this->ptr = new T(s);
-            horizon_misc::exit_heap_fail(this->ptr, "horizon::horizon_deps::sptr");
+            this->M_ptr = new T(s);
+            horizon_misc::exit_heap_fail(this->M_ptr, "horizon::horizon_deps::sptr");
             return *this;
         }
 
@@ -141,8 +141,8 @@ namespace horizon
         sptr<T> &sptr<T>::operator=(T &&s) noexcept(true)
         {
             this->release();
-            this->ptr = new T(std::move(s));
-            horizon_misc::exit_heap_fail(this->ptr, "horizon::horizon_deps::sptr");
+            this->M_ptr = new T(std::move(s));
+            horizon_misc::exit_heap_fail(this->M_ptr, "horizon::horizon_deps::sptr");
             return *this;
         }
 
@@ -152,8 +152,8 @@ namespace horizon
             if (this != &p)
             {
                 this->release();
-                this->ptr = new T(*p.ptr);
-                horizon_misc::exit_heap_fail(this->ptr, "horizon::horizon_deps::sptr");
+                this->M_ptr = new T(*p.M_ptr);
+                horizon_misc::exit_heap_fail(this->M_ptr, "horizon::horizon_deps::sptr");
             }
             return *this;
         }
@@ -164,8 +164,8 @@ namespace horizon
             if (this != &p)
             {
                 this->release();
-                this->ptr = p.ptr;
-                p.ptr = nullptr;
+                this->M_ptr = p.M_ptr;
+                p.M_ptr = nullptr;
             }
             return *this;
         }
@@ -174,47 +174,47 @@ namespace horizon
         sptr<T> &sptr<T>::operator=(T *p)
         {
             this->release();
-            this->ptr = p;
+            this->M_ptr = p;
             return *this;
         }
 
         template <typename T>
         sptr<T>::operator bool() const
         {
-            return !this->is_null(); // is_null is true if ptr is null so we have to inverse it
+            return !this->is_null(); // is_null is true if M_ptr is null so we have to inverse it
         }
 
         template <typename T>
         const T *sptr<T>::operator->() const
         {
-            return this->ptr;
+            return this->M_ptr;
         }
 
         template <typename T>
         T *&sptr<T>::operator->()
         {
-            return this->ptr;
+            return this->M_ptr;
         }
 
         template <typename T>
         const T &sptr<T>::operator*() const
         {
-            return *this->ptr;
+            return *this->M_ptr;
         }
 
         template <typename T>
         T &sptr<T>::operator*()
         {
-            return *this->ptr;
+            return *this->M_ptr;
         }
 
         template <typename T>
         sptr<T>::~sptr()
         {
-            if (this->ptr)
+            if (this->M_ptr)
             {
-                delete this->ptr;
-                this->ptr = nullptr;
+                delete this->M_ptr;
+                this->M_ptr = nullptr;
             }
         }
     }
