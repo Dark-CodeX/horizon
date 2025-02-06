@@ -32,11 +32,16 @@ namespace horizon
         };
 
         template <typename KEY, typename VALUE, typename hashing_function = std::hash<KEY>>
+        class hashtable_iter;
+
+        template <typename KEY, typename VALUE, typename hashing_function = std::hash<KEY>>
         class hashtable
         {
           private:
             node<KEY, VALUE> **M_table;
             std::size_t M_len, M_cap;
+
+            friend class hashtable_iter<KEY, VALUE, hashing_function>;
 
             void init_map(const std::size_t &__c);
             void rehash();
@@ -58,6 +63,8 @@ namespace horizon
             [[nodiscard]] bool is_empty() const;
             [[nodiscard]] bool compare(const hashtable &ht) const;
             hashtable &erase();
+
+            typedef hashtable_iter<KEY, VALUE, hashing_function> iter;
 
             [[nodiscard]] const std::size_t &length() const;
             [[nodiscard]] const std::size_t &capacity() const;
@@ -456,6 +463,67 @@ namespace horizon
         hashtable<KEY, VALUE, hashing_function>::~hashtable()
         {
             this->erase();
+        }
+
+        template <typename KEY, typename VALUE, typename hashing_function>
+        class hashtable_iter
+        {
+          private:
+            hashtable<KEY, VALUE, hashing_function> *M_hashtable;
+            node<KEY, VALUE> *M_curr;
+            std::size_t M_index;
+
+            hashtable_iter(hashtable<KEY, VALUE, hashing_function> *map);
+            const pair<KEY, VALUE> &operator->() const;
+            pair<KEY, VALUE> &operator->();
+            hashtable_iter &next();
+            hashtable_iter &operator++();
+        };
+
+        template <typename KEY, typename VALUE, typename hashing_function>
+        hashtable_iter<KEY, VALUE, hashing_function>::hashtable_iter(hashtable<KEY, VALUE, hashing_function> *map)
+        {
+            this->M_hashtable = map;
+            this->M_curr = nullptr;
+            this->M_index = 0;
+        }
+
+        template <typename KEY, typename VALUE, typename hashing_function>
+        const pair<KEY, VALUE> &hashtable_iter<KEY, VALUE, hashing_function>::operator->() const
+        {
+            return this->M_curr->M_element;
+        }
+
+        template <typename KEY, typename VALUE, typename hashing_function>
+        pair<KEY, VALUE> &hashtable_iter<KEY, VALUE, hashing_function>::operator->()
+        {
+            return this->M_curr->M_element;
+        }
+
+        template <typename KEY, typename VALUE, typename hashing_function>
+        hashtable_iter<KEY, VALUE, hashing_function> &hashtable_iter<KEY, VALUE, hashing_function>::next()
+        {
+            if (!this->M_curr)
+            {
+                this->M_curr = this->M_hashtable->M_table[this->M_index];
+                while (this->M_curr == nullptr)
+                {
+                    this->M_curr = this->M_hashtable->M_table[this->M_index++];
+                }
+            }
+            else if (this->M_curr->M_next)
+            {
+                this->M_curr = this->M_curr->M_next;
+            }
+            else
+                this->M_index++;
+            return *this;
+        }
+
+        template <typename KEY, typename VALUE, typename hashing_function>
+        hashtable_iter<KEY, VALUE, hashing_function> &hashtable_iter<KEY, VALUE, hashing_function>::operator++()
+        {
+            this->next();
         }
     }
 }
